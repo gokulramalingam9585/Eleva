@@ -12,26 +12,26 @@ const pool = new Pool({
 });
 
 const creatUser = (async (req, res) => {
-    const { FirstName, LastName, Email_Id, Phone_Number, Password } = req.body;
+    const { first_name, last_name, email_id, phone_number, password } = req.body;
     console.log(
-        { FirstName, LastName, Email_Id, Phone_Number, Password }
+        { first_name, last_name, email_id, phone_number, password }
     );
 
 
-    hashedPassword = await bcrypt.hash(Password, 10);
+    hashedPassword = await bcrypt.hash(password, 10);
     console.log(hashedPassword);
 
 
 
     pool.query(
-        'INSERT INTO BULDING_OCCUPANTS.REGISTER (FirstName,LastName,Email_Id,Phone_Number,Password) VALUES ($1, $2, $3,$4,$5)',
-        [FirstName, LastName, Email_Id, Phone_Number, hashedPassword],
+        'INSERT INTO eleva.building_occupants_register (first_name, last_name, email_id, phone_number, password) VALUES ($1, $2, $3,$4,$5)',
+        [first_name, last_name, email_id, phone_number, hashedPassword],
         (error, results) => {
             if (error) {
-                throw error
+                res.status(400).send(`Bad request`);
             }
             console.log(results.rows);
-            res.status(200).send(`User with ${Email_Id} registerd successfully `);
+            res.status(200).send(`User with ${email_id} registerd successfully `);
         }
     );
 
