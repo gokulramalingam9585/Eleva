@@ -32,9 +32,9 @@ const Checkuser = (req, res) => {
 };
 
 const creatUser = (async (req, res) => {
-    const { first_name, last_name, email_id, phone_number, password } = req.body;
+    const { first_name, last_name, email_id, phone_number, password, profile_url } = req.body;
     console.log(
-        { first_name, last_name, email_id, phone_number, password }
+        { first_name, last_name, email_id, phone_number, password, profile_url }
     );
     if (!phone_number) {
         res.status(400).json({ status: "error", reCode: 400, msg: "Please enter the Phone Number" })
@@ -51,8 +51,8 @@ const creatUser = (async (req, res) => {
             }
             else {
                 pool.query(
-                    'INSERT INTO eleva.occupants_details (first_name, last_name, email_id, phone_number, password) VALUES ($1, $2, $3,$4,$5)',
-                    [first_name, last_name, email_id, phone_number, hashedPassword],
+                    'INSERT INTO eleva.occupants_details (first_name, last_name, email_id, phone_number, password,profile_url) VALUES ($1, $2, $3,$4,$5,$6)',
+                    [first_name, last_name, email_id, phone_number, hashedPassword, profile_url],
                     (error, results) => {
                         if (error) {
                             res.status(400).json({ status: "error", reCode: 400, msg: "Not Registerd Sucessfully" });
@@ -69,13 +69,24 @@ const creatUser = (async (req, res) => {
 
 })
 
+const getAllUsers = (request, response) => {
+
+    pool.query('select * from eleva.occupants_details', (error, result) => {
+        if (error) {
+            res.status(400).json({ status: "error", reCode: 400, msg: "Request Not Available" })
+        }
+        response.status(200).json(result.rows)
+    })
+}
+
 
 
 
 
 module.exports = {
     Checkuser,
-    creatUser
+    creatUser,
+    getAllUsers
 
 
 }
