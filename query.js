@@ -11,16 +11,39 @@ const pool = new Pool({
     database: 'test'
 });
 
+const Checkuser = (req, res) => {
+    const { phone_number } = req.body;
+    pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+        if (error) {
+            res.status(400).json({ status: "error", reCode: 400, msg: "Not Found" })
+        }
+        // console.log(results.rows);
+        if(!phone_number){
+            res.status(400).json({status:"error", reCode: 400, msg: "Please enter the Phone Number"})
+        }
+       if (results.rows.length > 0) {
+            res.status(500).json({ status: "error", resCode: 500, msg: "Phone number Already exist" });
+        }
+        else{
+        res.status(200).json({ status: "sucess", reCode: 200, msh: `User with ${phone_number} sucessfully Registerd` })
+        }
+    })
+
+};
+
 const creatUser = (async (req, res) => {
     const { first_name, last_name, email_id, phone_number, password } = req.body;
     console.log(
         { first_name, last_name, email_id, phone_number, password }
     );
+    if(!phone_number){
+        res.status(400).json({status:"error", reCode: 400, msg: "Please enter the Phone Number"})
+    }else{
     hashedPassword = await bcrypt.hash(password, 10);
     console.log(hashedPassword);
     pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
         if (error) {
-            console.log(error);
+            res.status(400).json({ status: "error", reCode: 400, msg: "Invalid Request" })
         }
         console.log(results.rows);
         if (results.rows.length > 0) {
@@ -39,7 +62,9 @@ const creatUser = (async (req, res) => {
                 }
             );
         }
+    
     })
+}
 
 
 })
@@ -49,5 +74,8 @@ const creatUser = (async (req, res) => {
 
 
 module.exports = {
+    Checkuser,
     creatUser
+
+
 }
