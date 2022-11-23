@@ -69,9 +69,9 @@ const creatUser = (async (req, res) => {
 
 })
 
-const getAllUsers = (request, response) => {
-
-    pool.query('select * from eleva.occupants_details', (error, result) => {
+const getUsers = (request, response) => {
+    const phone_number = parseInt(request.params.phone_number)
+    pool.query('select * from eleva.occupants_details where phone_number = $1', [phone_number], (error, result) => {
         if (error) {
             res.status(400).json({ status: "error", reCode: 400, msg: "Request Not Available" })
         }
@@ -86,7 +86,7 @@ const getAllUsers = (request, response) => {
 module.exports = {
     Checkuser,
     creatUser,
-    getAllUsers
+    getUsers
 
 
 }

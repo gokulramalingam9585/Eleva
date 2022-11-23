@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 app.post('/user', db.Checkuser)
 app.post('/register', db.creatUser)
-app.get('/users',db.getAllUsers)
+app.get('/user/:phone_number',db.getUsers)
 
 
 
