@@ -6,9 +6,9 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }))
 const PORT = process.env.PORT || 3000;
 
-app.post('/user', db.Checkuser)
-app.post('/register', db.creatUser)
-app.get('/user/:phone_number',db.getUsers)
+app.get('/occupants/user', db.Checkuser)
+app.post('/occupants/register', db.creatUser)
+app.get('/occupants/user/:id',db.getUsers)
 
 
 
