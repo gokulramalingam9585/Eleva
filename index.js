@@ -6,11 +6,13 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }))
 const PORT = process.env.PORT || 3000;
 
-app.get('/occupants/user', db.Checkuser)
-app.post('/occupants/register', db.creatUser)
-app.get('/occupants/user/:id',db.getUsers)
+app.get('/occupants/user', db.CheckuserOccupants)
+app.post('/occupants/register', db.creatUserOccupants)
+app.get('/occupants/user/:id',db.getUserOccupants)
 
-
+app.get('/secretary/user', db.checkUserSecretary)
+app.post('/secretary/register', db.creatUserSecretary)
+app.get('/secretary/user/:id',db.getUserSecretary)
 
 
 app.listen(PORT, () => {
