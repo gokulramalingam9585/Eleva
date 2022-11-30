@@ -69,7 +69,7 @@ const getUserOccupants = (request, response) => {
             response.status(400).json({ status: "Error", reCode: 400, msg: "Request Not Available",isExist:false })
         }
         if (!result.rows.length) {
-            response.status(200).json({ status: "Error", reCode: 200, msg: "User Not Exist",isExist:true })
+            response.status(200).json({ status: "Sucess", reCode: 200, msg: "User Not Exist",isExist:false })
         }
         else {
             response.status(200).json(result.rows)
