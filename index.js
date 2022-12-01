@@ -12,10 +12,10 @@ app.post('/occupants/register', occupants.creatUserOccupants)
 app.get('/occupants/user/:id',occupants.getUserOccupants)
 app.put('/occupants/user/:id',occupants.updateUserOccupants)
 
-app.get('/secretary/user', secretary.checkUserSecretary)
+app.get('/secretary/:phone_number', secretary.checkUserSecretary)
 app.post('/secretary/register', secretary.creatUserSecretary)
 app.get('/secretary/user/:id',secretary.getUserSecretary)
-
+app.put('/secretary/user/:id',secretary.updateUserSecretary)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
