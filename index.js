@@ -3,6 +3,7 @@ const bodyparser = require('body-parser');
 const app = express();
 const occupants = require('./occupants');
 const secretary = require('./secretary')
+const eleva = require('./elevator')
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }))
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,9 @@ app.get('/secretary/:phone_number', secretary.checkUserSecretary)
 app.post('/secretary/register', secretary.creatUserSecretary)
 app.get('/secretary/user/:id',secretary.getUserSecretary)
 app.put('/secretary/user/:id',secretary.updateUserSecretary)
+
+app.get('/eleva/:id',eleva.getElevaDetails)
+app.get('/building/:id',eleva.getBuildingDetails)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
