@@ -5,6 +5,7 @@ const occupants = require('./occupants');
 const secretary = require('./secretary')
 const eleva = require('./elevator')
 const events = require('./events')
+const maintanence = require('./maintanence');
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }))
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,9 @@ app.get('/building/:id',eleva.getBuildingDetails)
 app.post('/create_event',events.creatEventsOccupants)
 app.get('/events/:id',events.getEvents)
 app.delete('/delete_event/:id',events.deleteEvent)
+
+app.post('/shedule_maintanence',maintanence.createMaintanence)
+app.get('/eleva_maintanence/:id',maintanence.getmaintanence)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
