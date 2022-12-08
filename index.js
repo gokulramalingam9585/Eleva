@@ -28,7 +28,7 @@ app.get('/events/:id',events.getEvents)
 app.delete('/delete_event/:id',events.deleteEvent)
 
 app.post('/shedule_maintanence',maintanence.createMaintanence)
-app.get('/eleva_maintanence/:id',maintanence.getmaintanence)
+app.get('/eleva_maintanence/:id',maintanence.getMaintanence)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

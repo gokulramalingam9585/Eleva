@@ -13,13 +13,13 @@ const pool = new Pool({
 });
 
 const getElevaDetails = (request, response) => {
-    const id = parseInt(request.params.id)
+    const id = request.params.id
     pool.query('select * from eleva.eleva_details where eleva_id = $1', [id], (error, result) => {
         if (error) {
-            response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
+           return response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
         }
         if (!result.rows.length) {
-            response.status(200).json({ status: "sucess", reCode: 200, msg: "eleva Not Exist",isExist:false })
+            return response.status(200).json({ status: "sucess", reCode: 200, msg: "eleva Not Exist",isExist:false })
         }
         else {
             response.status(200).json(result.rows)
@@ -28,13 +28,13 @@ const getElevaDetails = (request, response) => {
 }
 
 const getBuildingDetails = (request,response) =>{
-    const id = parseInt(request.params.id)
+    const id = request.params.id
     pool.query('select * from eleva.eleva_details where building_id = $1',[id],(error,result) => {
         if (error){
-            response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
+            return response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
         }
         if (!result.rows.length){
-            response.status(200).json({ status: "sucess", reCode: 200, msg: "Building Not Exist",isExist:false })
+             return response.status(200).json({ status: "sucess", reCode: 200, msg: "Building Not Exist",isExist:false })
         }
         else {
             response.status(200).json(result.rows)

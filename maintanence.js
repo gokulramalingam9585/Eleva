@@ -19,7 +19,7 @@ const createMaintanence = (request, response) => {
     pool.query('INSERT INTO eleva.maintanence_details ( id,eleva_id,building_id,secretary_id,date,from_time,to_time ) VALUES ($1,$2,$3,$4,$5,$6,$7)',
         [id, eleva_id, building_id, secretary_id, date, from_time, to_time], (error, result) => {
             if (error) {
-                response.status(400).json({
+                return response.status(400).json({
                     status: "Error",
                     reCode: 400,
                     msg: "Maintanence Not Sheduled",
@@ -27,7 +27,7 @@ const createMaintanence = (request, response) => {
                 })
 
             }
-            response.status(200).json({
+             response.status(200).json({
                 status: "Sucess",
                 reCode: 200,
                 msg: `Maintanence Sheduled successfully with Id : ${id}`
@@ -35,11 +35,11 @@ const createMaintanence = (request, response) => {
         })
 }
 
-const getmaintanence = (request, response) => {
-    const id = parseInt(request.params.id)
+const getMaintanence = (request, response) => {
+    const id = request.params.id
     pool.query('select * from eleva.maintanence_details where id = $1', [id], (error, result) => {
         if (error) {
-            response.status(400).json({
+            return response.status(400).json({
                 status: "Error",
                 reCode: 400,
                 msg: "Request Not Available",
@@ -47,9 +47,10 @@ const getmaintanence = (request, response) => {
             })
         }
         if (!result.rows.length) {
-            response.status(200).json({
+            return response.status(200).json({
                 status: "Sucess",
                 reCode: 200,
+                response:`${id}`,
                 msg: "Maintanence Not Exisit",
                 isExist: false
             })
@@ -61,5 +62,5 @@ const getmaintanence = (request, response) => {
 
 module.exports = {
     createMaintanence,
-    getmaintanence
+    getMaintanence
 }
