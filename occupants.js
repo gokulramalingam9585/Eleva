@@ -4,17 +4,18 @@ const Pool = require('pg').Pool;
 
 const pool = new Pool({
     host: 'localhost',
-    port: 9000,
+    port: 5432,
     user: 'postgres',
-    password: 'root',
-    database: 'test'
+    password: 'shalla',
+    database: 'eleva'
 });
 
 const CheckuserOccupants = (req, res) => {
     const phone_number = parseInt(req.params.phone_number);
-    pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+    pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
         if (error) {
-            res.status(400).json({ status: "error", reCode: 400, msg: "Request Unavailable" })
+            res.status(400).json({ status: "error", reCode: 400, msg: "Request Unavailable" });
+            return;
         }
         // console.log(results.rows);
         // if (!phone_number) {
@@ -37,9 +38,10 @@ const creatUserOccupants = (req, res) => {
     if (!phone_number) {
         res.status(400).json({ status: false, reCode: 400, msg: "Please enter the Phone Number" })
     } else {
-        pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+        pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
             if (error) {
-                res.status(400).json({ status: "error", reCode: 400, msg: "Invalid Request",isExist:false })
+                res.status(400).json({ status: "error", reCode: 400, msg: "Invalid Request",isExist:false });
+                return;
             }
             console.log(results.rows);
             if (results.rows.length > 0) {
@@ -47,11 +49,12 @@ const creatUserOccupants = (req, res) => {
             }
             else {
                 pool.query(
-                    'INSERT INTO eleva.occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
+                    'INSERT INTO occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
                     [user_id, first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no],
                     (error, result) => {
                         if (error) {
                             res.status(400).json({ status: "error", reCode: 400, msg: "Not Registerd Sucessfully",isExist:false });
+                            return;
                         }
                         console.log(result.rows);
                         res.status(200).json({ status: "sucess", reCode: 200, msg: `User with ${user_id} ${first_name},${last_name},${email_id},${phone_number} sucessfully Registerd`,isExist:false });
@@ -63,16 +66,21 @@ const creatUserOccupants = (req, res) => {
 }
 
 const getUserOccupants = (request, response) => {
-    const id = parseInt(request.params.id)
-    pool.query('select * from eleva.occupants_details where user_id = $1', [id], (error, result) => {
+    const id = request.params.id;
+    pool.query('select * from occupants_details where user_id = $1', [id], (error, result) => {
         if (error) {
-            response.status(400).json({ status: "Error", reCode: 400, msg: "Request Not Available",isExist:false })
+            response.status(400).json({ status: "Error", reCode: 400, msg: "Request Not Available",isExist:false });
+            return;
         }
-        if (!result.rows.length) {
-            response.status(200).json({ status: "Sucess", reCode: 200, msg: "User Not Exist",isExist:false })
+        
+        if (result.rows.length>0) {
+            console.log("user exist");
+            console.log(result.rows);
+            response.status(200).json({ status: "Sucess", reCode: 200, msg: "User Exist",isExist:true,res:result.rows })
         }
         else {
-            response.status(200).json(result.rows)
+            console.log("user not exist");
+            response.status(200).json({ status: "Sucess", reCode: 200, msg: "User Not Exist",isExist:false })
         }
     })
 }
