@@ -5,17 +5,17 @@ const Pool = require('pg').Pool;
 
 const pool = new Pool({
     host: 'localhost',
-    port: 9000,
+    port: 5432,
     user: 'postgres',
-    password: 'root',
-    database: 'test'
+    password: 'shalla',
+    database: 'eleva'
 });
 
 
 
 const checkUserSecretary = (req, res) => {
     const phone_number = parseInt(req.params.phone_number);
-    pool.query('SELECT * FROM eleva.secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
+    pool.query('SELECT * FROM secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
         if (error) {
             res.status(400).json({ status: false, reCode: 400, msg: "Not Found" })
         }
@@ -41,9 +41,10 @@ const creatUserSecretary = (req, res) => {
         res.status(400).json({ status: false, reCode: 400, msg: "Please enter the Phone Number" })
     } else {
         
-        pool.query('SELECT * FROM eleva.secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
+        pool.query('SELECT * FROM secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
             if (error) {
-                res.status(400).json({ status: false, reCode: 400, msg: "Invalid Request" })
+                res.status(400).json({ status: false, reCode: 400, msg: "Invalid Request" });
+                return;
             }
             console.log(results.rows);
             if (results.rows.length > 0) {
@@ -51,11 +52,12 @@ const creatUserSecretary = (req, res) => {
             }
             else {
                 pool.query(
-                    'INSERT INTO eleva.secretary_details ( secretary_id,first_name, last_name, email_id, phone_number, profile_url,building_id,eleva_id ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
+                    'INSERT INTO secretary_details ( secretary_id,first_name, last_name, email_id, phone_number, profile_url,building_id,eleva_id ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
                     [secretary_id, first_name, last_name, email_id, phone_number, profile_url,building_id,eleva_id],
                     (error, result) => {
                         if (error) {
                             res.status(400).json({ status: false, reCode: 400, msg: "Not Registerd Sucessfully" });
+                            return;
                         }
                         console.log(result.rows);
                         res.status(200).json({ status: true, reCode: 200, msg: `User with ${secretary_id} ${first_name},${last_name},${email_id},${phone_number} sucessfully Registerd` });
@@ -67,16 +69,20 @@ const creatUserSecretary = (req, res) => {
 }
 
 const getUserSecretary = (request, response) => {
-    const id = parseInt(request.params.id)
-    pool.query('select * from eleva.secretary_details where secretary_id = $1', [id], (error, result) => {
+    const id = request.params.id
+    pool.query('select * from secretary_details where secretary_id = $1', [id], (error, result) => {
         if (error) {
-            response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
+            response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false});
+        return;
         }
-        if (!result.rows.length) {
-            response.status(200).json({ status: "sucess", reCode: 200, msg: "User Not Exist",isExist:false })
+        if (result.rows.length>0) {
+            console.log("user exist");
+            console.log(result.rows);
+            response.status(200).json({ status: "Sucess", reCode: 200, msg: "User Exist",isExist:true,res:result.rows })
         }
         else {
-            response.status(200).json(result.rows)
+            console.log("user not exist");
+            response.status(200).json({ status: "Sucess", reCode: 200, msg: "User Not Exist",isExist:false })
         }
     })
 }
