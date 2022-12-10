@@ -58,6 +58,37 @@ const getEvents = (request, response) => {
     })
 }
 
+const getAllEvents = (request, response) => {
+    const date = request.params.date
+    pool.query('select * from eleva.events_details where date >= $1', [date], (error, result) => {
+        if (error) {
+            return response.status(400).json({
+                status: "Error",
+                reCode: 400,
+                msg: "Request Not Available",
+                isExist: false
+            })
+        }
+        if (!result.rows.length) {
+            return response.status(200).json({
+                status: "Sucess",
+                reCode: 200,
+                response: `${date}`,
+                msg: "Events Not Available",
+                isExist: false
+            })
+        }
+        response.status(200).json({
+            status: "Sucess",
+            reCode: 200,
+            msg: "Events Available",
+            isExist: true,
+            response: result.rows 
+        })
+    })
+}
+
+
 const deleteEvent = (request, response) => {
     const id = request.params.id;
 
@@ -79,5 +110,6 @@ const deleteEvent = (request, response) => {
 module.exports = {
     creatEventsOccupants,
     getEvents,
-    deleteEvent
+    deleteEvent,
+    getAllEvents
 }

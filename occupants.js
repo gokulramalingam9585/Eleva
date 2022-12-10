@@ -119,6 +119,39 @@ const getUserOccupants = (request, response) => {
         response.status(200).json(result.rows)
     })
 }
+const getBuildingOccupants = (request, response) => {
+    const id = request.params.id
+    pool.query('select * from eleva.occupants_details where building_id = $1', [id], (error, result) => {
+        if (error) {
+             response.status(400).json({
+                status: "Error",
+                reCode: 400,
+                msg: "Request Not Available",
+                isExist: false
+            })
+            return;
+        }
+        if (!result.rows.length) {
+            response.status(200).json({
+                status: "Sucess",
+                reCode: 200,
+                response: `${building_id}`,
+                msg: "User Not Exist",
+                isExist: false
+            })
+            return;
+        }
+        response.status(200).json(
+            {
+                status: "Sucess",
+                reCode: 200,
+                msg: "Occupants Available",
+                isExist: true,
+                response: result.rows, 
+            }
+            )
+    })
+}
 
 const updateUserOccupants = (request, response) => {
     const user_id = request.params.id
@@ -145,4 +178,5 @@ module.exports = {
     creatUserOccupants,
     getUserOccupants,
     updateUserOccupants,
+    getBuildingOccupants
 }

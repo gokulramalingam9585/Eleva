@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.get('/occupants/:phone_number', occupants.CheckuserOccupants)
 app.post('/occupants/register', occupants.creatUserOccupants)
 app.get('/occupants/user/:id',occupants.getUserOccupants)
+app.get('/occupants/getalloccupants/:id',occupants.getBuildingOccupants)
 app.put('/occupants/user/:id',occupants.updateUserOccupants)
 
 app.get('/secretary/:phone_number', secretary.checkUserSecretary)
@@ -27,6 +28,7 @@ app.get('/building/:id',eleva.getBuildingDetails)
 
 app.post('/create_event',events.creatEventsOccupants)
 app.get('/events/:id',events.getEvents)
+app.get('/events/getallevents/:date',events.getAllEvents)
 app.delete('/delete_event/:id',events.deleteEvent)
 
 app.post('/shedule_maintanence',maintanence.createMaintanence)
