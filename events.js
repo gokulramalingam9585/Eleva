@@ -16,8 +16,9 @@ const creatEventsOccupants = (request, response) => {
     const { id, title, details, date, from_time, to_time, location, status, cancel_reason, denied_reason, building_id, created_by, creator_id, secretary_notes } = request.body
     console.log({ location });
 
-    pool.query('INSERT INTO eleva.events_details ( id,title,details,date,from_time,to_time,location,status,cancel_reason,denied_reason,building_id,created_by,creator_id,secretary_notes ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
-        [id, title, details, date, from_time, to_time, location, status, cancel_reason, denied_reason, building_id, created_by, creator_id, secretary_notes], (error, result) => {
+    pool.query('INSERT INTO eleva.events_details ( id,title,details,date,from_time,to_time,location,status,cancel_reason,denied_reason,building_id,created_by,creator_id,secretary_notes ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
+        [id, title, details, date, from_time, to_time, location, status, cancel_reason, denied_reason, building_id, created_by, creator_id, secretary_notes], 
+        (error, result) => {
             if (error) {
                 response.status(400).json({
                     status: "Error",
@@ -75,12 +76,11 @@ const getEvents = (request, response) => {
 
 const getAllEvents = (request, response) => {
     const date = request.params.date
-    const id = request.params.id
-    const created_by = request.params.created_by
-    const user_id = request.params.user_id
-    const secretary_id = request.params.secretary_id
+    const building_id = request.params.building_id+''
     const status = request.params.status + ''
-    pool.query('select * from eleva.events_details where building_id = $1 and date >= $2 and status = $3', [id, date, status], (error, result) => {
+
+
+    pool.query("SELECT events_details.*, occupants_details.first_name as occ_first_name,occupants_details.last_name as occ_last_name,occupants_details.profile_url as occ_profile_url, secretary_details.first_name as sec_first_name,secretary_details.last_name as sec_last_name,secretary_details.profile_url as sec_profile_url FROM events_details LEFT JOIN occupants_details ON events_details.creator_id = occupants_details.user_id AND events_details.created_by = 'occupant' LEFT JOIN secretary_details ON events_details.creator_id = secretary_details.secretary_id AND events_details.created_by = 'secretary' where events_details.building_id = $1 and events_details.date>=$2 and events_details.status = $3", [building_id,date,status], (error, result) => {
         if (error) {
             response.status(400).json({
                 status: "Error",
@@ -88,65 +88,28 @@ const getAllEvents = (request, response) => {
                 msg: "Request Not Available",
                 isExist: false
             })
+            console.log("error :"+error)
             return
         }
         if (!result.rows.length) {
             response.status(200).json({
-                status: "Sucess",
+                status: "Success",
                 reCode: 200,
-                response: `${date}`,
+                response: `${building_id}`,
                 msg: "Events Not Available",
                 isExist: false
             })
             return
         }
-        if (created_by == 'user') {
-            pool.query('select * from eleva.occupants_details where user_id = $1', [user_id], (error, res) => {
-                if (error) {
-                    response.status(400).json({
-                        status: "Error",
-                        reCode: 400,
-                        msg: "Request Not Available",
-                        isExist: false
-                    })
-                    return;
-                }
-
-                response.status(200).json({
-                    response: res.rows + response.status(200).json({
-                        status: "Sucess",
-                        reCode: 200,
-                        msg: "Events Available",
-                        isExist: true,
-                        response: result.rows
-                    })
-                })
+        response.status(200).json({
+                status: "Success",
+                reCode: 200,
+                msg: "Events Available",
+                isExist: true,
+                response: result.rows
             })
-        } else if (created_by == 'secretary') {
-            pool.query('select * from eleva.secretary_details where secretary_id = $1', [secretary_id], (error, res) => {
-                if (error) {
-                    response.status(400).json({
-                        status: "Error",
-                        reCode: 400,
-                        msg: "Request Not Available",
-                        isExist: false
-                    })
-                    return
-                }
-                response.status(200).json({
-                    response: res.rows + response.status(200).json({
-                        status: "Sucess",
-                        reCode: 200,
-                        msg: "Events Available",
-                        isExist: true,
-                        response: result.rows
-                    })
-                })
-            })
-        }
     })
 }
-
 const deleteEvent = (request, response) => {
     const id = request.params.id;
 
