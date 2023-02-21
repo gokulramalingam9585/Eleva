@@ -46,7 +46,7 @@ const createTables = () => {
         eleva_id integer NOT NULL,
         CONSTRAINT secretary_details_pkey PRIMARY KEY (secretary_id)
     )`
-    ;
+        ;
 
     const createMaintanenceDetails = `CREATE TABLE IF NOT EXISTS eleva.maintanence_details
     (
@@ -91,7 +91,7 @@ const createTables = () => {
         "time" time without time zone NOT NULL,
         CONSTRAINT eleva_details_pkey PRIMARY KEY (eleva_id)
     )`
-    ;
+        ;
 
     const createBuildingDetails = `CREATE TABLE IF NOT EXISTS eleva.building_details
     (
@@ -101,14 +101,14 @@ const createTables = () => {
     );
     `
     pool.query(createEventsDetails)
-    .then(() => pool.query(createBuildingDetails))
-    .then(() => pool.query(createMaintanenceDetails))
-    .then(() => pool.query(createOccupantsDetails))
-    .then(() => pool.query(createSecretaryDetails))
-    .then(() => pool.query(createElevaDetails))
-    .then(() => console.log('Tables created successfully'))
-    .catch(err => console.error(err))
-    .finally(() => pool.end());
+        .then(() => pool.query(createBuildingDetails))
+        .then(() => pool.query(createMaintanenceDetails))
+        .then(() => pool.query(createOccupantsDetails))
+        .then(() => pool.query(createSecretaryDetails))
+        .then(() => pool.query(createElevaDetails))
+        .then(() => console.log('Tables created successfully'))
+        .catch(err => console.error(err))
+        .finally(() => pool.end());
 
 }
 
