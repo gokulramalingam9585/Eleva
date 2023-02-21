@@ -1,28 +1,11 @@
 const bcrypt = require('bcrypt');
-
-const Pool = require('pg').Pool;
-
-const pool = new Pool({
-    host: 'localhost',
-    port: 9000,
-    user: 'postgres',
-    password: 'root',
-    database: 'test'
-});
+const pool = require("./database");
 
 const CheckuserOccupants = (req, res) => {
+try{
     const phone_number = req.params.phone_number;
     pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
-        if (error) {
-             res.status(400).json({
-                status: "error",
-                reCode: 400,
-                msg: "Request Unavailable"
-            })
-            return
-        }
-
-        if (results.rows.length > 0) {
+          if (results.rows.length > 0) {
              res.status(200).json({
                 status: "sucess",
                 resCode: 200,
@@ -39,9 +22,18 @@ const CheckuserOccupants = (req, res) => {
             isExist: false
         })
     })
+} catch(error) {
+    res.status(400).json({
+       status: "error",
+       reCode: 400,
+       msg: "Request Unavailable"
+   })
+   return
+}
 };
 
 const creatUserOccupants = (req, res) => {
+try{
     const { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no } = req.body;
     console.log(
         { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no }
@@ -55,16 +47,7 @@ const creatUserOccupants = (req, res) => {
         return
     } else {
         pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
-            if (error) {
-                 res.status(400).json({
-                    status: "error",
-                    reCode: 400,
-                    msg: "Invalid Request",
-                    isExist: false
-                })
-                return
-            }
-            console.log(results.rows);
+             console.log(results.rows);
             if (results.rows.length > 0) {
                  res.status(200).json({
                     status: "sucess",
@@ -102,20 +85,22 @@ const creatUserOccupants = (req, res) => {
             }
         })
     }
+} catch(error) {
+    res.status(400).json({
+       status: "error",
+       reCode: 400,
+       msg: "Invalid Request",
+       isExist: false
+   })
+   return
+}
+
 }
 
 const getUserOccupants = (request, response) => {
+try{
     const user_id = request.params.user_id
     pool.query('select * from eleva.occupants_details where user_id = $1', [user_id], (error, result) => {
-        if (error) {
-             response.status(400).json({
-                status: "Error",
-                reCode: 400,
-                msg: "Request Not Available",
-                isExist: false
-            })
-            return;
-        }
         if (!result.rows.length) {
             response.status(200).json({
                 status: "Sucess",
@@ -133,19 +118,20 @@ const getUserOccupants = (request, response) => {
             response: result.rows, 
         })
     })
+} catch (error) {
+    response.status(400).json({
+       status: "Error",
+       reCode: 400,
+       msg: "Request Not Available",
+       isExist: false
+   })
+   return;
+}
 }
 const getBuildingOccupants = (request, response) => {
+try{
     const building_id = request.params.building_id
     pool.query('select * from eleva.occupants_details where building_id = $1', [building_id], (error, result) => {
-        if (error) {
-             response.status(400).json({
-                status: "Error",
-                reCode: 400,
-                msg: "Request Not Available",
-                isExist: false
-            })
-            return;
-        }
         if (!result.rows.length) {
             response.status(200).json({
                 status: "Sucess",
@@ -166,21 +152,22 @@ const getBuildingOccupants = (request, response) => {
             }
             )
     })
+} catch (error) {
+    response.status(400).json({
+       status: "Error",
+       reCode: 400,
+       msg: "Request Not Available",
+       isExist: false
+   })
+   return;
+}
 }
 
 const updateUserOccupantsName = (request, response) => {
+try{
     const user_id = request.params.user_id
     const { first_name, last_name } = request.body
-
     pool.query('update eleva.occupants_details set first_name = $1,  last_name = $2 where user_id = $3', [first_name, last_name, user_id], (error, result) => {
-        if (error) {
-            response.status(400).json({
-                status: false,
-                reCode: 400,
-                msg: "Not Updated Sucessfully"
-            })
-            return
-        }
         response.status(200).json({
             status: true,
             reCode: 200,
@@ -188,21 +175,21 @@ const updateUserOccupantsName = (request, response) => {
             msg: `UserName updated sucessfully`
         })
     })
+} catch (error) {
+    response.status(400).json({
+        status: false,
+        reCode: 400,
+        msg: "Not Updated Sucessfully"
+    })
+    return
+}
 }
 
 const updateUserOccupantsEmail = (request, response) => {
+try{
     const user_id = request.params.user_id
     const { email_id } = request.body
-
     pool.query('update eleva.occupants_details set email_id = $1 where user_id = $2', [ email_id, user_id], (error, result) => {
-        if (error) {
-            response.status(400).json({
-                status: false,
-                reCode: 400,
-                msg: "Not Updated Sucessfully"
-            })
-            return
-        }
         response.status(200).json({
             status: true,
             reCode: 200,
@@ -210,21 +197,21 @@ const updateUserOccupantsEmail = (request, response) => {
             msg: `UserEmail updated sucessfully`
         })
     })
+} catch (error) {
+    response.status(400).json({
+        status: false,
+        reCode: 400,
+        msg: "Not Updated Sucessfully"
+    })
+    return
+}
 }
 
 const updateUserOccupantsProfile = (request, response) => {
+try{
     const user_id = request.params.user_id
     const { profile_url } = request.body
-
     pool.query('update eleva.occupants_details set profile_url = $1 where user_id = $2', [profile_url, user_id], (error, result) => {
-        if (error) {
-            response.status(400).json({
-                status: false,
-                reCode: 400,
-                msg: "Not Updated Sucessfully"
-            })
-            return
-        }
         response.status(200).json({
             status: true,
             reCode: 200,
@@ -232,21 +219,21 @@ const updateUserOccupantsProfile = (request, response) => {
             msg: `UserProfile updated sucessfully`
         })
     })
+} catch (error) {
+    response.status(400).json({
+        status: false,
+        reCode: 400,
+        msg: "Not Updated Sucessfully"
+    })
+    return
+}
 }
 
 const updateUserOccupantsFloorNo = (request, response) => {
+try{
     const user_id = request.params.user_id
     const { floor_no } = request.body
-
     pool.query('update eleva.occupants_details set floor_no = $1 where user_id = $2', [floor_no, user_id], (error, result) => {
-        if (error) {
-            response.status(400).json({
-                status: false,
-                reCode: 400,
-                msg: "Not Updated Sucessfully"
-            })
-            return
-        }
         response.status(200).json({
             status: true,
             reCode: 200,
@@ -254,8 +241,15 @@ const updateUserOccupantsFloorNo = (request, response) => {
             msg: `User updated sucessfully`
         })
     })
+} catch (error) {
+    response.status(400).json({
+        status: false,
+        reCode: 400,
+        msg: "Not Updated Sucessfully"
+    })
+    return
 }
-
+}
 
 module.exports = {
     CheckuserOccupants,
