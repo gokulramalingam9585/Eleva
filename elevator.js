@@ -2,52 +2,81 @@
 const bcrypt = require('bcrypt');
 const { request } = require('express');
 
-const Pool = require('pg').Pool;
-
-const pool = new Pool({
-    host: 'localhost',
-    port: 5432,
-    user: 'postgres',
-    password: 'shalla',
-    database: 'eleva'
-});
+const pool = require("./database");
 
 const getElevaDetails = (request, response) => {
-    const id = request.params.id
-    pool.query('select * from eleva_details where eleva_id = $1', [id], (error, result) => {
-        if (error) {
-           return response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
-        }
-        if (!result.rows.length) {
-            return response.status(200).json({ status: "sucess", reCode: 200, msg: "eleva Not Exist",isExist:false })
-        }
-        else {
-            response.status(200).json(result.rows)
-        }
-    })
+    try {
+        const id = request.params.id
+        pool.query('select * from eleva.eleva_details where eleva_id = $1', [id], (error, result) => {
+            if (!result.rows.length) {
+                response.status(200).json({
+                    status: "sucess",
+                    reCode: 200,
+                    response: `${id}`,
+                    msg: "eleva Not Exist",
+                    isExist: false
+                })
+                return
+            } else {
+                response.status(200).json({
+                    status: "sucess",
+                    reCode: 200,
+                    msg: "Eleva Available ",
+                    isExist: true,
+                    response: result.rows
+                })
+            }
+        })
+    } catch (error) {
+        response.status(400).json({
+            status: "Error",
+            reCode: 400,
+            msg: "Request Not Available",
+            isExist: false
+        })
+        return
+    }
 }
 
-const getBuildingDetails = (request,response) =>{
-    const id = request.params.id
-    pool.query('select * from eleva_details where building_id = $1',[id],(error,result) => {
-        if (error){
-            return response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
-        }
-        if (!result.rows.length){
-             return response.status(200).json({ status: "sucess", reCode: 200, msg: "Building Not Exist",isExist:false })
-        }
-        else {
-            response.status(200).json(result.rows)
-        }
-    })
+
+
+const getBuildingDetails = (request, response) => {
+    try {
+        const building_id = request.params.building_id
+        pool.query('select * from eleva.eleva_details where building_id = $1', [building_id], (error, result) => {
+
+            if (!result.rows.length) {
+                response.status(200).json({
+                    status: "sucess",
+                    reCode: 200,
+                    response: `${building_id}`,
+                    msg: "Building Not Exist",
+                    isExist: false
+                })
+                return
+            }
+            else {
+                response.status(200).json({
+                    status: "sucess",
+                    reCode: 200,
+                    msg: "Eleva Available",
+                    isExist: true,
+                    response: result.rows
+                })
+            }
+        })
+    } catch (error) {
+        response.status(400).json({
+            status: "Error",
+            reCode: 400,
+            msg: "Request Not Available",
+            isExist: false
+        })
+        return
+    }
 }
-
-
-
-
 
 module.exports = {
     getElevaDetails,
     getBuildingDetails
-
 }
