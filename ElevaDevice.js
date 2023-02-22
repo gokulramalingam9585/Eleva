@@ -5,16 +5,16 @@ const Pool = require('pg').Pool;
 
 const pool = new Pool({
     host: 'localhost',
-    port: 9000,
+    port: 5432,
     user: 'postgres',
-    password: 'root',
-    database: 'test'
+    password: 'shalla',
+    database: 'eleva'
 });
 
 
 const getOccupants = (request, response) => {
     const id = request.params.id
-    pool.query('select * from eleva.occupants_details where user_id = $1', [id], (error, result) => {
+    pool.query('select * from occupants_details where user_id = $1', [id], (error, result) => {
         if (error) {
             return response.status(400).json({
                 status: "Error",
@@ -38,7 +38,7 @@ const getOccupants = (request, response) => {
 
 const getElevaEvents = (request, response) => {
     const id = request.params.id
-    pool.query('select * from eleva.events_details where id = $1', [id], (error, result) => {
+    pool.query('select * from events_details where id = $1', [id], (error, result) => {
         if (error) {
             return response.status(400).json({
                 status: "Error",
@@ -62,7 +62,7 @@ const getElevaEvents = (request, response) => {
 
 const getEleva = (request, response) => {
     const id = request.params.id
-    pool.query('select * from eleva.eleva_details where eleva_id = $1', [id], (error, result) => {
+    pool.query('select * from eleva_details where eleva_id = $1', [id], (error, result) => {
         if (error) {
            return response.status(400).json({
             status: "Error", 

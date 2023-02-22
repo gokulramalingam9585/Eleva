@@ -6,15 +6,15 @@ const Pool = require('pg').Pool;
 
 const pool = new Pool({
     host: 'localhost',
-    port: 9000,
+    port: 5432,
     user: 'postgres',
-    password: 'root',
-    database: 'test'
+    password: 'shalla',
+    database: 'eleva'
 });
 
 const getElevaDetails = (request, response) => {
     const id = request.params.id
-    pool.query('select * from eleva.eleva_details where eleva_id = $1', [id], (error, result) => {
+    pool.query('select * from eleva_details where eleva_id = $1', [id], (error, result) => {
         if (error) {
            return response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
         }
@@ -29,7 +29,7 @@ const getElevaDetails = (request, response) => {
 
 const getBuildingDetails = (request,response) =>{
     const id = request.params.id
-    pool.query('select * from eleva.eleva_details where building_id = $1',[id],(error,result) => {
+    pool.query('select * from eleva_details where building_id = $1',[id],(error,result) => {
         if (error){
             return response.status(400).json({status: "Error", reCode: 400, msg: "Request Not Available",isExist:false})
         }

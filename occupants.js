@@ -11,17 +11,16 @@ const pool = new Pool({
 });
 
 
-
 const CheckuserOccupants = (req, res) => {
     const phone_number = req.params.phone_number;
-    pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+    pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+        console.log("error occured : "+ error);
         if (error) {
             return res.status(400).json({
                 status: "error",
                 reCode: 400,
                 msg: "Request Unavailable"
-            });
-            return;
+            })
         }
 
         if (results.rows.length > 0) {
@@ -54,7 +53,7 @@ const creatUserOccupants = (req, res) => {
             msg: "Please enter the Phone Number"
         })
     } else {
-        pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+        pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
             if (error) {
                 return res.status(400).json({
                     status: "error",
@@ -75,7 +74,7 @@ const creatUserOccupants = (req, res) => {
             }
             else {
                 pool.query(
-                    'INSERT INTO eleva.occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
+                    'INSERT INTO occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
                     [user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no],
                     (error, result) => {
                         if (error) {
@@ -101,7 +100,7 @@ const creatUserOccupants = (req, res) => {
 
 const getUserOccupants = (request, response) => {
     const id = request.params.id
-    pool.query('select * from eleva.occupants_details where user_id = $1', [id], (error, result) => {
+    pool.query('select * from occupants_details where user_id = $1', [id], (error, result) => {
         if (error) {
             return response.status(400).json({
                 status: "Error",
@@ -112,14 +111,22 @@ const getUserOccupants = (request, response) => {
         }
         if (!result.rows.length) {
             response.status(200).json({
-                status: "Sucess",
+                status: "Success",
                 reCode: 200,
                 response: `${id}`,
                 msg: "User Not Exist",
                 isExist: false
             })
         }
-        response.status(200).json(result.rows)
+
+        response.status(200).json({
+            status: "Success",
+            reCode: 200,
+            response: result.rows,
+            msg: "User Exist",
+            isExist: true
+        })
+    
     })
 }
 
@@ -127,7 +134,7 @@ const updateUserOccupants = (request, response) => {
     const user_id = request.params.id
     const { first_name, last_name, email_id, profile_url } = request.body
 
-    pool.query('update eleva.occupants_details set first_name = $1,  last_name = $2, email_id = $3, profile_url = $4 where user_id = $5', [first_name, last_name, email_id, profile_url, user_id], (error, result) => {
+    pool.query('update occupants_details set first_name = $1,  last_name = $2, email_id = $3, profile_url = $4 where user_id = $5', [first_name, last_name, email_id, profile_url, user_id], (error, result) => {
         if (error) {
             return response.status(400).json({
                 status: false,
@@ -147,12 +154,13 @@ const getBuildingOccupants = (request, response) => {
     const building_id = request.params.building_id
     pool.query('select * from occupants_details where building_id = $1', [building_id], (error, result) => {
         if (error) {
-            return response.status(400).json({
+             response.status(400).json({
                 status: "Error",
                 reCode: 400,
                 msg: "Request Not Available",
                 isExist: false
             })
+            return;
         }
         if (!result.rows.length) {
             response.status(200).json({
@@ -162,8 +170,105 @@ const getBuildingOccupants = (request, response) => {
                 msg: "User Not Exist",
                 isExist: false
             })
+            return;
         }
-        response.status(200).json(result.rows)
+        response.status(200).json(
+            {
+                status: "Sucess",
+                reCode: 200,
+                msg: "Occupants Available",
+                isExist: true,
+                response: result.rows, 
+            }
+            )
+    })
+}
+
+const updateUserOccupantsName = (request, response) => {
+    const user_id = request.params.user_id
+    const {first_name, last_name} = request.body
+    
+    pool.query('update occupants_details set first_name = $1, last_name = $2 where user_id = $3', [first_name, last_name,user_id], (error, result) => {
+        if (error) {
+            response.status(400).json({
+                status: false,
+                reCode: 400,
+                msg: "Not Updated Successfully"
+            })
+            return
+        }
+        response.status(200).json({
+            status: true,
+            reCode: 200,
+            response:`${first_name}`,
+            msg: `UserName updated successfully`
+        })
+    })
+}
+
+const updateUserOccupantsEmail = (request, response) => {
+    const user_id = request.params.user_id
+    const { email_id } = request.body
+
+    pool.query('update occupants_details set email_id = $1 where user_id = $2', [ email_id, user_id], (error, result) => {
+        if (error) {
+            response.status(400).json({
+                status: false,
+                reCode: 400,
+                msg: "Not Updated Successfully"
+            })
+            return
+        }
+        response.status(200).json({
+            status: true,
+            reCode: 200,
+            response:`${email_id}`,
+            msg: `UserEmail updated successfully`
+        })
+    })
+}
+
+const updateUserOccupantsProfile = (request, response) => {
+    const user_id = request.params.user_id
+    const { profile_url } = request.body
+
+    pool.query('update occupants_details set profile_url = $1 where user_id = $2', [profile_url, user_id], (error, result) => {
+        if (error) {
+            response.status(400).json({
+                status: false,
+                reCode: 400,
+                msg: "Not Updated Successfully"
+            })
+            return
+        }
+        response.status(200).json({
+            status: true,
+            reCode: 200,
+            response:`${profile_url}`,
+            msg: `UserProfile updated successfully`
+        })
+    })
+}
+
+const updateUserOccupantsFloorNo = (request, response) => {
+    const user_id = request.params.user_id
+    const { floor_no } = request.body
+
+    pool.query('update occupants_details set floor_no = $1 where user_id = $2', [floor_no, user_id], (error, result) => {
+        if (error) {
+            response.status(400).json({
+                status: false,
+                reCode: 400,
+                msg: "Not Updated Successfully"
+            })
+            return
+        }
+        response.status(200).json({
+            status: true,
+            reCode: 200,
+            response:`${floor_no}`,
+            msg: `User updated successfully`
+        })
     })
 }
 
@@ -173,4 +278,8 @@ module.exports = {
     getUserOccupants,
     updateUserOccupants,
     getBuildingOccupants,
+    updateUserOccupantsFloorNo,
+    updateUserOccupantsProfile,
+    updateUserOccupantsEmail,
+    updateUserOccupantsName
 }
