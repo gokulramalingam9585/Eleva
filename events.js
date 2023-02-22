@@ -7,7 +7,7 @@ const creatEventsOccupants = (request, response) => {
     try {
         const { id, title, details, date, from_time, to_time, location, status, cancel_reason, denied_reason, building_id, created_by, creator_id, secretary_notes } = request.body
         console.log({ location });
-        pool.query('INSERT INTO eleva.events_details ( id,title,details,date,from_time,to_time,location,status,cancel_reason,denied_reason,building_id,created_by,creator_id,secretary_notes ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
+        pool.query('INSERT INTO events_details ( id,title,details,date,from_time,to_time,location,status,cancel_reason,denied_reason,building_id,created_by,creator_id,secretary_notes ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
             [id, title, details, date, from_time, to_time, location, status, cancel_reason, denied_reason, building_id, created_by, creator_id, secretary_notes],
             (error, result) => {
                 response.status(200).json({
@@ -32,7 +32,7 @@ const creatEventsOccupants = (request, response) => {
 const getEvents = (request, response) => {
     try {
         const id = request.params.id
-        pool.query('select * from eleva.events_details where id = $1', [id], (error, result) => {
+        pool.query('select * from events_details where id = $1', [id], (error, result) => {
             if (!result.rows.length) {
                 response.status(200).json({
                     status: "Sucess",
@@ -110,7 +110,7 @@ const getAllEventsAcceptedRejected = (request, response) => {
         const stat_acc = 'accepted'
         const stat_rej = 'rejected'
 
-        pool.query("SELECT * from eleva.events_details where building_id = $1 and date>=$2 and creator_id = $3 and (status = $4 or status = $5)", [building_id, date, creator_id, stat_acc, stat_rej], (error, result) => {
+        pool.query("SELECT * from events_details where building_id = $1 and date>=$2 and creator_id = $3 and (status = $4 or status = $5)", [building_id, date, creator_id, stat_acc, stat_rej], (error, result) => {
 
             if (!result.rows.length) {
                 response.status(200).json({
@@ -146,7 +146,7 @@ const getAllEventsAcceptedRejected = (request, response) => {
 const deleteEvent = (request, response) => {
     try {
         const id = request.params.id;
-        pool.query('DELETE FROM eleva.events_details WHERE id = $1', [id], (error, result) => {
+        pool.query('DELETE FROM events_details WHERE id = $1', [id], (error, result) => {
 
             response.status(200).json({
                 status: "sucess",
@@ -170,7 +170,7 @@ const updateEventStatus = (request, response) => {
     try {
         const { id, denied_reason, secretary_notes, status, cancel_reason } = request.body
         if (status == 'accepted') {
-            pool.query('update eleva.events_details set secretary_notes = $1, status = $2 where id = $3', [secretary_notes, status, id], (error, result) => {
+            pool.query('update events_details set secretary_notes = $1, status = $2 where id = $3', [secretary_notes, status, id], (error, result) => {
                 response.status(200).json({
                     status: true,
                     reCode: 200,
@@ -178,7 +178,7 @@ const updateEventStatus = (request, response) => {
                 })
             })
         } else if (status == 'rejected') {
-            pool.query('update eleva.events_details set status = $1,  denied_reason = $2 where id = $3', [status, denied_reason, id], (error, result) => {
+            pool.query('update events_details set status = $1,  denied_reason = $2 where id = $3', [status, denied_reason, id], (error, result) => {
                 response.status(200).json({
                     status: true,
                     reCode: 200,
@@ -186,7 +186,7 @@ const updateEventStatus = (request, response) => {
                 })
             })
         } else if (status == 'cancelled') {
-            pool.query('update eleva.events_details set status = $1, cancel_reason = $2 where id = $3', [status, cancel_reason, id], (error, result) => {
+            pool.query('update events_details set status = $1, cancel_reason = $2 where id = $3', [status, cancel_reason, id], (error, result) => {
                 response.status(200).json({
                     status: true,
                     reCode: 200,
@@ -208,7 +208,7 @@ const updateEventDetails = (request, response) => {
         const { title, details, date, from_time, to_time, location, id } = request.body
         console.log({ location });
 
-        pool.query('update eleva.events_details set title = $1,  details = $2,date = $3,from_time = $4, to_time = $5, location = $6 where id = $7', [title, details, date, from_time, to_time, location, id], (error, result) => {
+        pool.query('update events_details set title = $1,  details = $2,date = $3,from_time = $4, to_time = $5, location = $6 where id = $7', [title, details, date, from_time, to_time, location, id], (error, result) => {
             response.status(200).json({
                 status: true,
                 reCode: 200,

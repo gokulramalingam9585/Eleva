@@ -4,7 +4,7 @@ const pool = require("./database");
 const CheckuserOccupants = (req, res) => {
     try {
         const phone_number = req.params.phone_number;
-        pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+        pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
             if (results.rows.length > 0) {
                 res.status(200).json({
                     status: "sucess",
@@ -46,7 +46,7 @@ const creatUserOccupants = (req, res) => {
             })
             return
         } else {
-            pool.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+            pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
                 console.log(results.rows);
                 if (results.rows.length > 0) {
                     res.status(200).json({
@@ -60,7 +60,7 @@ const creatUserOccupants = (req, res) => {
                 }
                 else {
                     pool.query(
-                        'INSERT INTO eleva.occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
+                        'INSERT INTO occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
                         [user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no],
                         (error, result) => {
                             if (error) {
@@ -100,7 +100,7 @@ const creatUserOccupants = (req, res) => {
 const getUserOccupants = (request, response) => {
     try {
         const user_id = request.params.user_id
-        pool.query('select * from eleva.occupants_details where user_id = $1', [user_id], (error, result) => {
+        pool.query('select * from occupants_details where user_id = $1', [user_id], (error, result) => {
             if (!result.rows.length) {
                 response.status(200).json({
                     status: "Sucess",
@@ -131,7 +131,7 @@ const getUserOccupants = (request, response) => {
 const getBuildingOccupants = (request, response) => {
     try {
         const building_id = request.params.building_id
-        pool.query('select * from eleva.occupants_details where building_id = $1', [building_id], (error, result) => {
+        pool.query('select * from occupants_details where building_id = $1', [building_id], (error, result) => {
             if (!result.rows.length) {
                 response.status(200).json({
                     status: "Sucess",
@@ -167,7 +167,7 @@ const updateUserOccupantsName = (request, response) => {
     try {
         const user_id = request.params.user_id
         const { first_name, last_name } = request.body
-        pool.query('update eleva.occupants_details set first_name = $1,  last_name = $2 where user_id = $3', [first_name, last_name, user_id], (error, result) => {
+        pool.query('update occupants_details set first_name = $1,  last_name = $2 where user_id = $3', [first_name, last_name, user_id], (error, result) => {
             response.status(200).json({
                 status: true,
                 reCode: 200,
@@ -189,7 +189,7 @@ const updateUserOccupantsEmail = (request, response) => {
     try {
         const user_id = request.params.user_id
         const { email_id } = request.body
-        pool.query('update eleva.occupants_details set email_id = $1 where user_id = $2', [email_id, user_id], (error, result) => {
+        pool.query('update occupants_details set email_id = $1 where user_id = $2', [email_id, user_id], (error, result) => {
             response.status(200).json({
                 status: true,
                 reCode: 200,
@@ -211,7 +211,7 @@ const updateUserOccupantsProfile = (request, response) => {
     try {
         const user_id = request.params.user_id
         const { profile_url } = request.body
-        pool.query('update eleva.occupants_details set profile_url = $1 where user_id = $2', [profile_url, user_id], (error, result) => {
+        pool.query('update occupants_details set profile_url = $1 where user_id = $2', [profile_url, user_id], (error, result) => {
             response.status(200).json({
                 status: true,
                 reCode: 200,
@@ -233,7 +233,7 @@ const updateUserOccupantsFloorNo = (request, response) => {
     try {
         const user_id = request.params.user_id
         const { floor_no } = request.body
-        pool.query('update eleva.occupants_details set floor_no = $1 where user_id = $2', [floor_no, user_id], (error, result) => {
+        pool.query('update occupants_details set floor_no = $1 where user_id = $2', [floor_no, user_id], (error, result) => {
             response.status(200).json({
                 status: true,
                 reCode: 200,

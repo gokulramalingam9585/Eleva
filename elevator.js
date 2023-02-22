@@ -7,7 +7,7 @@ const pool = require("./database");
 const getElevaDetails = (request, response) => {
     try {
         const id = request.params.id
-        pool.query('select * from eleva.eleva_details where eleva_id = $1', [id], (error, result) => {
+        pool.query('select * from eleva_details where eleva_id = $1', [id], (error, result) => {
             if (!result.rows.length) {
                 response.status(200).json({
                     status: "sucess",
@@ -43,7 +43,7 @@ const getElevaDetails = (request, response) => {
 const getBuildingDetails = (request, response) => {
     try {
         const building_id = request.params.building_id
-        pool.query('select * from eleva.eleva_details where building_id = $1', [building_id], (error, result) => {
+        pool.query('select * from eleva_details where building_id = $1', [building_id], (error, result) => {
 
             if (!result.rows.length) {
                 response.status(200).json({
@@ -65,7 +65,7 @@ const getBuildingDetails = (request, response) => {
                 })
             }
         })
-    } catch (error) {
+    } catch (error) {false
         response.status(400).json({
             status: "Error",
             reCode: 400,
