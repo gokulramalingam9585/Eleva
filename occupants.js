@@ -3,23 +3,36 @@ const pool = require("./database");
 
 const CheckuserOccupants = (req, res) => {
     try {
-        const phone_number = req.params.phone_number;
-        pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
-            if (results.rows.length > 0) {
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
+                    isExist: false
+                });
+                return;
+            }
+            const phone_number = req.params.phone_number;
+            client.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+                client.release()
+                if (results.rows.length > 0) {
+                    res.status(200).json({
+                        status: "sucess",
+                        resCode: 200,
+                        response: `${phone_number}`,
+                        msg: "Phone number Already exist",
+                        isExist: true
+                    });
+                    return
+                }
                 res.status(200).json({
                     status: "sucess",
-                    resCode: 200,
-                    response: `${phone_number}`,
-                    msg: "Phone number Already exist",
-                    isExist: true
-                });
-                return
-            }
-            res.status(200).json({
-                status: "sucess",
-                reCode: 200,
-                msg: "Pnone number not Exist",
-                isExist: false
+                    reCode: 200,
+                    msg: "Pnone number not Exist",
+                    isExist: false
+                })
             })
         })
     } catch (error) {
@@ -34,57 +47,71 @@ const CheckuserOccupants = (req, res) => {
 
 const creatUserOccupants = (req, res) => {
     try {
-        const { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no } = req.body;
-        console.log(
-            { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no }
-        );
-        if (!phone_number) {
-            res.status(400).json({
-                status: false,
-                reCode: 400,
-                msg: "Please enter the Phone Number"
-            })
-            return
-        } else {
-            pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
-                console.log(results.rows);
-                if (results.rows.length > 0) {
-                    res.status(200).json({
-                        status: "sucess",
-                        resCode: 200,
-                        response: `${phone_number}`,
-                        msg: "Phone number Already exist",
-                        isExist: true
-                    });
-                    return
-                }
-                else {
-                    pool.query(
-                        'INSERT INTO occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
-                        [user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no],
-                        (error, result) => {
-                            if (error) {
-                                res.status(400).json({
-                                    status: "error",
-                                    reCode: 400,
-                                    msg: "Not Registerd Sucessfully",
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
+                    isExist: false
+                });
+                return;
+            }
+            const { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no } = req.body;
+            console.log(
+                { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no }
+            );
+            if (!phone_number) {
+                res.status(400).json({
+                    status: false,
+                    reCode: 400,
+                    msg: "Please enter the Phone Number"
+                })
+                return
+            } else {
+                client.query('SELECT * FROM eleva.occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+                    client.release();
+                    console.log(results.rows);
+                    if (results.rows.length > 0) {
+                        res.status(200).json({
+                            status: "sucess",
+                            resCode: 200,
+                            response: `${phone_number}`,
+                            msg: "Phone number Already exist",
+                            isExist: true
+                        });
+                        return
+                    }
+                    else {
+                        client.query(
+                            'INSERT INTO eleva.occupants_details ( user_id,first_name, last_name, email_id, phone_number, profile_url,building_id,floor_no ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
+                            [user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no],
+                            (error, result) => {
+                                client.release();
+                                if (error) {
+                                    res.status(400).json({
+                                        status: "error",
+                                        reCode: 400,
+                                        msg: "Not Registerd Sucessfully",
+                                        isExist: false
+                                    });
+                                    return
+                                }
+                                console.log(result.rows);
+                                res.status(200).json({
+                                    status: "sucess",
+                                    reCode: 200,
+                                    response: `${user_id} ${first_name},${last_name},${email_id},${phone_number},${profile_url},${building_id},${floor_no}`,
+                                    msg: `User with sucessfully Registerd`,
                                     isExist: false
                                 });
-                                return
                             }
-                            console.log(result.rows);
-                            res.status(200).json({
-                                status: "sucess",
-                                reCode: 200,
-                                response: `${user_id} ${first_name},${last_name},${email_id},${phone_number},${profile_url},${building_id},${floor_no}`,
-                                msg: `User with sucessfully Registerd`,
-                                isExist: false
-                            });
-                        }
-                    );
-                }
-            })
-        }
+                        );
+                    }
+                })
+            }
+        })
     } catch (error) {
         res.status(400).json({
             status: "error",
@@ -99,23 +126,36 @@ const creatUserOccupants = (req, res) => {
 
 const getUserOccupants = (request, response) => {
     try {
-        const user_id = request.params.user_id
-        pool.query('select * from occupants_details where user_id = $1', [user_id], (error, result) => {
-            if (!result.rows.length) {
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
+                    isExist: false
+                });
+                return;
+            }
+            const user_id = request.params.user_id
+            client.query('select * from eleva.occupants_details where user_id = $1', [user_id], (error, result) => {
+                client.release();
+                if (!result.rows.length) {
+                    response.status(200).json({
+                        status: "Sucess",
+                        reCode: 200,
+                        response: `${user_id}`,
+                        msg: "User Not Exist",
+                        isExist: false
+                    })
+                }
                 response.status(200).json({
                     status: "Sucess",
                     reCode: 200,
-                    response: `${user_id}`,
-                    msg: "User Not Exist",
-                    isExist: false
+                    msg: "Occupants Available",
+                    isExist: true,
+                    response: result.rows,
                 })
-            }
-            response.status(200).json({
-                status: "Sucess",
-                reCode: 200,
-                msg: "Occupants Available",
-                isExist: true,
-                response: result.rows,
             })
         })
     } catch (error) {
@@ -130,27 +170,40 @@ const getUserOccupants = (request, response) => {
 }
 const getBuildingOccupants = (request, response) => {
     try {
-        const building_id = request.params.building_id
-        pool.query('select * from occupants_details where building_id = $1', [building_id], (error, result) => {
-            if (!result.rows.length) {
-                response.status(200).json({
-                    status: "Sucess",
-                    reCode: 200,
-                    response: `${building_id}`,
-                    msg: "User Not Exist",
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
                     isExist: false
-                })
+                });
                 return;
             }
-            response.status(200).json(
-                {
-                    status: "Sucess",
-                    reCode: 200,
-                    msg: "Occupants Available",
-                    isExist: true,
-                    response: result.rows
+            const building_id = request.params.building_id
+            client.query('select * from eleva.occupants_details where building_id = $1', [building_id], (error, result) => {
+                client.release();
+                if (!result.rows.length) {
+                    response.status(200).json({
+                        status: "Sucess",
+                        reCode: 200,
+                        response: `${building_id}`,
+                        msg: "User Not Exist",
+                        isExist: false
+                    })
+                    return;
                 }
-            )
+                response.status(200).json(
+                    {
+                        status: "Sucess",
+                        reCode: 200,
+                        msg: "Occupants Available",
+                        isExist: true,
+                        response: result.rows
+                    }
+                )
+            })
         })
     } catch (error) {
         response.status(400).json({
@@ -165,14 +218,27 @@ const getBuildingOccupants = (request, response) => {
 
 const updateUserOccupantsName = (request, response) => {
     try {
-        const user_id = request.params.user_id
-        const { first_name, last_name } = request.body
-        pool.query('update occupants_details set first_name = $1,  last_name = $2 where user_id = $3', [first_name, last_name, user_id], (error, result) => {
-            response.status(200).json({
-                status: true,
-                reCode: 200,
-                response: `${first_name}`,
-                msg: `UserName updated sucessfully`
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
+                    isExist: false
+                });
+                return;
+            }
+            const user_id = request.params.user_id
+            const { first_name, last_name } = request.body
+            client.query('update eleva.occupants_details set first_name = $1,  last_name = $2 where user_id = $3', [first_name, last_name, user_id], (error, result) => {
+                client.release();
+                response.status(200).json({
+                    status: true,
+                    reCode: 200,
+                    response: `${first_name}`,
+                    msg: `UserName updated sucessfully`
+                })
             })
         })
     } catch (error) {
@@ -187,14 +253,27 @@ const updateUserOccupantsName = (request, response) => {
 
 const updateUserOccupantsEmail = (request, response) => {
     try {
-        const user_id = request.params.user_id
-        const { email_id } = request.body
-        pool.query('update occupants_details set email_id = $1 where user_id = $2', [email_id, user_id], (error, result) => {
-            response.status(200).json({
-                status: true,
-                reCode: 200,
-                response: `${email_id}`,
-                msg: `UserEmail updated sucessfully`
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
+                    isExist: false
+                });
+                return;
+            }
+            const user_id = request.params.user_id
+            const { email_id } = request.body
+            client.query('update eleva.occupants_details set email_id = $1 where user_id = $2', [email_id, user_id], (error, result) => {
+                client.release();
+                response.status(200).json({
+                    status: true,
+                    reCode: 200,
+                    response: `${email_id}`,
+                    msg: `UserEmail updated sucessfully`
+                })
             })
         })
     } catch (error) {
@@ -209,14 +288,27 @@ const updateUserOccupantsEmail = (request, response) => {
 
 const updateUserOccupantsProfile = (request, response) => {
     try {
-        const user_id = request.params.user_id
-        const { profile_url } = request.body
-        pool.query('update occupants_details set profile_url = $1 where user_id = $2', [profile_url, user_id], (error, result) => {
-            response.status(200).json({
-                status: true,
-                reCode: 200,
-                response: `${profile_url}`,
-                msg: `UserProfile updated sucessfully`
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
+                    isExist: false
+                });
+                return;
+            }
+            const user_id = request.params.user_id
+            const { profile_url } = request.body
+            client.query('update eleva.occupants_details set profile_url = $1 where user_id = $2', [profile_url, user_id], (error, result) => {
+                client.release();
+                response.status(200).json({
+                    status: true,
+                    reCode: 200,
+                    response: `${profile_url}`,
+                    msg: `UserProfile updated sucessfully`
+                })
             })
         })
     } catch (error) {
@@ -231,14 +323,27 @@ const updateUserOccupantsProfile = (request, response) => {
 
 const updateUserOccupantsFloorNo = (request, response) => {
     try {
-        const user_id = request.params.user_id
-        const { floor_no } = request.body
-        pool.query('update occupants_details set floor_no = $1 where user_id = $2', [floor_no, user_id], (error, result) => {
-            response.status(200).json({
-                status: true,
-                reCode: 200,
-                response: `${floor_no}`,
-                msg: `User updated sucessfully`
+        // Acquire a connection from the pool
+        pool.connect((error, client) => {
+            if (error) {
+                response.status(500).json({
+                    status: "Error",
+                    reCode: 500,
+                    msg: "Failed to acquire a database connection",
+                    isExist: false
+                });
+                return;
+            }
+            const user_id = request.params.user_id
+            const { floor_no } = request.body
+            client.query('update eleva.occupants_details set floor_no = $1 where user_id = $2', [floor_no, user_id], (error, result) => {
+                client.release();
+                response.status(200).json({
+                    status: true,
+                    reCode: 200,
+                    response: `${floor_no}`,
+                    msg: `User updated sucessfully`
+                })
             })
         })
     } catch (error) {

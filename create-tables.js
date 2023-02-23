@@ -1,8 +1,18 @@
-const pool = require("./database");
+const client = require("./database");
 
-pool.connect();
 const createTables = () => {
-    const createEventsDetails = `CREATE TABLE IF NOT EXISTS events_details
+    client.connect((error,client)=>{
+        if (error) {
+            response.status(500).json({
+              status: "Error",
+              reCode: 500,
+              msg: "Failed to acquire a database connection",
+              isExist: false
+            });
+            return;
+          }
+
+    const createEventsDetails = `CREATE TABLE IF NOT EXISTS eleva.events_details
     (
         id integer NOT NULL,
         title text ,
@@ -21,7 +31,7 @@ const createTables = () => {
         CONSTRAINT events_details_pkey PRIMARY KEY (id)
     )`;
 
-    const createOccupantsDetails = `CREATE TABLE IF NOT EXISTS occupants_details
+    const createOccupantsDetails = `CREATE TABLE IF NOT EXISTS eleva.occupants_details
     (
         user_id text  NOT NULL,
         first_name character varying  NOT NULL,
@@ -34,7 +44,7 @@ const createTables = () => {
         CONSTRAINT occupants_details_pkey PRIMARY KEY (user_id)
     )`;
 
-    const createSecretaryDetails = `CREATE TABLE IF NOT EXISTS secretary_details
+    const createSecretaryDetails = `CREATE TABLE IF NOT EXISTS eleva.secretary_details
     (
         secretary_id text  NOT NULL,
         first_name character varying  NOT NULL,
@@ -48,7 +58,7 @@ const createTables = () => {
     )`
         ;
 
-    const createMaintanenceDetails = `CREATE TABLE IF NOT EXISTS maintanence_details
+    const createMaintanenceDetails = `CREATE TABLE IF NOT EXISTS eleva.maintanence_details
     (
         id integer NOT NULL,
         eleva_id text  NOT NULL,
@@ -62,7 +72,7 @@ const createTables = () => {
     `;
 
     const createElevaDetails = `
-    CREATE TABLE IF NOT EXISTS eleva_details
+    CREATE TABLE IF NOT EXISTS eleva.eleva_details
     (
         eleva_name character varying  NOT NULL,
         eleva_id integer NOT NULL,
@@ -93,23 +103,24 @@ const createTables = () => {
     )`
         ;
 
-    const createBuildingDetails = `CREATE TABLE IF NOT EXISTS building_details
+    const createBuildingDetails = `CREATE TABLE IF NOT EXISTS eleva.building_details
     (
         building_id integer NOT NULL,
-        building_name character varying NOT NULL,
+        building_name character varying  NOT NULL,
         CONSTRAINT building_details_pkey PRIMARY KEY (building_id)
     );
     `
-    pool.query(createEventsDetails)
-        .then(() => pool.query(createBuildingDetails))
-        .then(() => pool.query(createMaintanenceDetails))
-        .then(() => pool.query(createOccupantsDetails))
-        .then(() => pool.query(createSecretaryDetails))
-        .then(() => pool.query(createElevaDetails))
+    client.query(createEventsDetails)
+        .then(() => client.query(createBuildingDetails))
+        .then(() => client.query(createMaintanenceDetails))
+        .then(() => client.query(createOccupantsDetails))
+        .then(() => client.query(createSecretaryDetails))
+        .then(() => client.query(createElevaDetails))
         .then(() => console.log('Tables created successfully'))
         .catch(err => console.error(err))
-        .finally(() => pool.end());
-
+        client.release()
+        // .finally(() => client.end());
+});
 }
 
 module.exports = createTables;
