@@ -5,7 +5,7 @@ const CheckuserOccupants = (req, res) => {
         // Acquire a connection from the pool
         pool.connect((error, client) => {
             if (error) {
-                response.status(500).json({
+                res.status(500).json({
                     status: "Error",
                     reCode: 500,
                     msg: "Failed to acquire a database connection",
@@ -16,9 +16,19 @@ const CheckuserOccupants = (req, res) => {
             const phone_number = req.params.phone_number;
             client.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
                 client.release()
+                if (error) {
+                    console.log(`error : ${error}`);
+                    res.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (results.rows.length > 0) {
                     res.status(200).json({
-                        status: "sucess",
+                        status: "success",
                         resCode: 200,
                         response: `${phone_number}`,
                         msg: "Phone number Already exist",
@@ -27,7 +37,7 @@ const CheckuserOccupants = (req, res) => {
                     return
                 }
                 res.status(200).json({
-                    status: "sucess",
+                    status: "success",
                     reCode: 200,
                     msg: "Pnone number not Exist",
                     isExist: false
@@ -50,7 +60,7 @@ const creatUserOccupants = (req, res) => {
         // Acquire a connection from the pool
         pool.connect((error, client) => {
             if (error) {
-                response.status(500).json({
+                res.status(500).json({
                     status: "Error",
                     reCode: 500,
                     msg: "Failed to acquire a database connection",
@@ -68,14 +78,25 @@ const creatUserOccupants = (req, res) => {
                     reCode: 400,
                     msg: "Please enter the Phone Number"
                 })
-                return
+
             } else {
                 client.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
-                    client.release();
-                    console.log(results.rows);
+
+                    if (error) {
+                        console.log(`error : ${error}`);
+                        res.status(500).json({
+                            status: "Error",
+                            reCode: 500,
+                            msg: "Internal server error",
+                            isExist: false
+                        })
+                        return;
+                    }
+
                     if (results.rows.length > 0) {
+                        client.release();
                         res.status(200).json({
-                            status: "sucess",
+                            status: "success",
                             resCode: 200,
                             response: `${phone_number}`,
                             msg: "Phone number Already exist",
@@ -93,17 +114,17 @@ const creatUserOccupants = (req, res) => {
                                     res.status(400).json({
                                         status: "error",
                                         reCode: 400,
-                                        msg: "Not Registerd Sucessfully",
+                                        msg: "Not Registered Sucessfully",
                                         isExist: false
                                     });
                                     return
                                 }
-                                console.log(result.rows);
+
                                 res.status(200).json({
-                                    status: "sucess",
+                                    status: "success",
                                     reCode: 200,
                                     response: `${user_id} ${first_name},${last_name},${email_id},${phone_number},${profile_url},${building_id},${floor_no}`,
-                                    msg: `User with sucessfully Registerd`,
+                                    msg: `User sucessfully Registered`,
                                     isExist: false
                                 });
                             }
@@ -140,9 +161,19 @@ const getUserOccupants = (request, response) => {
             const user_id = request.params.user_id
             client.query('select * from occupants_details where user_id = $1', [user_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
-                    response.status(200).json({
-                        status: "Sucess",
+                    return response.status(200).json({
+                        status: "Success",
                         reCode: 200,
                         response: `${user_id}`,
                         msg: "User Not Exist",
@@ -150,7 +181,7 @@ const getUserOccupants = (request, response) => {
                     })
                 }
                 response.status(200).json({
-                    status: "Sucess",
+                    status: "Success",
                     reCode: 200,
                     msg: "Occupants Available",
                     isExist: true,
@@ -184,9 +215,19 @@ const getBuildingOccupants = (request, response) => {
             const building_id = request.params.building_id
             client.query('select * from occupants_details where building_id = $1', [building_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
-                        status: "Sucess",
+                        status: "Success",
                         reCode: 200,
                         response: `${building_id}`,
                         msg: "User Not Exist",
@@ -196,7 +237,7 @@ const getBuildingOccupants = (request, response) => {
                 }
                 response.status(200).json(
                     {
-                        status: "Sucess",
+                        status: "Success",
                         reCode: 200,
                         msg: "Occupants Available",
                         isExist: true,
@@ -233,6 +274,16 @@ const updateUserOccupantsName = (request, response) => {
             const { first_name, last_name } = request.body
             client.query('update occupants_details set first_name = $1,  last_name = $2 where user_id = $3', [first_name, last_name, user_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
                     status: true,
                     reCode: 200,
@@ -268,6 +319,16 @@ const updateUserOccupantsEmail = (request, response) => {
             const { email_id } = request.body
             client.query('update occupants_details set email_id = $1 where user_id = $2', [email_id, user_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
                     status: true,
                     reCode: 200,
@@ -303,8 +364,18 @@ const updateUserOccupantsProfile = (request, response) => {
             const { profile_url } = request.body
             client.query('update occupants_details set profile_url = $1 where user_id = $2', [profile_url, user_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
-                    status: true,
+                    status: 'success',
                     reCode: 200,
                     response: `${profile_url}`,
                     msg: `UserProfile updated sucessfully`
@@ -338,8 +409,18 @@ const updateUserOccupantsFloorNo = (request, response) => {
             const { floor_no } = request.body
             client.query('update occupants_details set floor_no = $1 where user_id = $2', [floor_no, user_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
-                    status: true,
+                    status: 'success',
                     reCode: 200,
                     response: `${floor_no}`,
                     msg: `User updated sucessfully`
