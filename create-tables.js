@@ -3,18 +3,13 @@ const client = require("./database");
 const createTables = () => {
     client.connect((error, client) => {
         if (error) {
-            response.status(500).json({
-                status: "Error",
-                reCode: 500,
-                msg: "Failed to acquire a database connection",
-                isExist: false
-            });
+            console.log(`error : ${error}`);
             return;
         }
 
-        const createEventsDetails = `CREATE TABLE IF NOT EXISTS eleva.events_details
+        const createEventsDetails = `CREATE TABLE IF NOT EXISTS events_details
     (
-        id integer NOT NULL,
+        id SERIAL PRIMARY KEY,
         title text ,
         details text ,
         date date,
@@ -27,11 +22,10 @@ const createTables = () => {
         building_id text ,
         created_by character varying ,
         creator_id text ,
-        secretary_notes text ,
-        CONSTRAINT events_details_pkey PRIMARY KEY (id)
+        secretary_notes text
     )`;
 
-        const createOccupantsDetails = `CREATE TABLE IF NOT EXISTS eleva.occupants_details
+        const createOccupantsDetails = `CREATE TABLE IF NOT EXISTS occupants_details
     (
         user_id text  NOT NULL,
         first_name character varying  NOT NULL,
@@ -44,7 +38,7 @@ const createTables = () => {
         CONSTRAINT occupants_details_pkey PRIMARY KEY (user_id)
     )`;
 
-        const createSecretaryDetails = `CREATE TABLE IF NOT EXISTS eleva.secretary_details
+        const createSecretaryDetails = `CREATE TABLE IF NOT EXISTS secretary_details
     (
         secretary_id text  NOT NULL,
         first_name character varying  NOT NULL,
@@ -58,21 +52,20 @@ const createTables = () => {
     )`
             ;
 
-        const createMaintanenceDetails = `CREATE TABLE IF NOT EXISTS eleva.maintanence_details
+        const createMaintanenceDetails = `CREATE TABLE IF NOT EXISTS maintanence_details
     (
-        id integer NOT NULL,
+        id SERIAL PRIMARY KEY,
         eleva_id text  NOT NULL,
         building_id text  NOT NULL,
         secretary_id text  NOT NULL,
         date date,
         from_time time without time zone,
-        to_time time without time zone,
-        CONSTRAINT maintanence_details_pkey PRIMARY KEY (id)
+        to_time time without time zone
     )
     `;
 
         const createElevaDetails = `
-    CREATE TABLE IF NOT EXISTS eleva.eleva_details
+    CREATE TABLE IF NOT EXISTS eleva_details
     (
         eleva_name character varying  NOT NULL,
         eleva_id integer NOT NULL,
@@ -103,7 +96,7 @@ const createTables = () => {
     )`
             ;
 
-        const createBuildingDetails = `CREATE TABLE IF NOT EXISTS eleva.building_details
+        const createBuildingDetails = `CREATE TABLE IF NOT EXISTS building_details
     (
         building_id integer NOT NULL,
         building_name character varying  NOT NULL,

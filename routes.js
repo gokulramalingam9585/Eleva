@@ -18,7 +18,7 @@ router.put('/occupants/user/floor/:user_id', occupants.updateUserOccupantsFloorN
 
 router.get('/secretary/:phone_number', secretary.checkUserSecretary)
 router.post('/secretary/register', secretary.creatUserSecretary)
-router.get('/secretary/user/:secretary_id', secretary.getUserSecretary)
+router.get('/secretary/user/:id', secretary.getUserSecretary)
 router.put('/secretary/user/name/:secretary_id', secretary.updateUserSecretaryName)
 router.put('/secretary/user/email/:secretary_id', secretary.updateUserSecretaryEmail)
 router.put('/secretary/user/profile/:secretary_id', secretary.updateUserSecretaryProfile)

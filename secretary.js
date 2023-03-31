@@ -15,7 +15,7 @@ const checkUserSecretary = (req, res) => {
                 return;
             }
             const phone_number = req.params.phone_number;
-            client.query('SELECT * FROM eleva.secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
+            client.query('SELECT * FROM secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
                 client.release();
                 if (results.rows.length > 0) {
                     res.status(200).json({
@@ -51,7 +51,7 @@ const creatUserSecretary = (req, res) => {
         // Acquire a connection from the pool
         pool.connect((error, client) => {
             if (error) {
-                response.status(500).json({
+                res.status(500).json({
                     status: "Error",
                     reCode: 500,
                     msg: "Failed to acquire a database connection",
@@ -59,9 +59,9 @@ const creatUserSecretary = (req, res) => {
                 });
                 return;
             }
-            const { secretary_id, first_name, last_name, email_id, phone_number, profile_url, building_id, eleva_id } = req.body;
+            const { secretary_id, first_name, last_name, email_id, phone_number, profile_url, building_id } = req.body;
             console.log(
-                { secretary_id, first_name, last_name, email_id, phone_number, profile_url, building_id, eleva_id }
+                { secretary_id, first_name, last_name, email_id, phone_number, profile_url, building_id }
             );
             if (!phone_number) {
                 res.status(400).json({
@@ -72,10 +72,11 @@ const creatUserSecretary = (req, res) => {
                 return
             } else {
 
-                client.query('SELECT * FROM eleva.secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
-                    client.release();
+                client.query('SELECT * FROM secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
+                    // client.release();
                     console.log(results.rows);
                     if (results.rows.length > 0) {
+                        client.release();
                         res.status(200).json({
                             status: 'sucess',
                             resCode: 200,
@@ -87,23 +88,25 @@ const creatUserSecretary = (req, res) => {
                     }
                     else {
                         client.query(
-                            'INSERT INTO eleva.secretary_details ( secretary_id,first_name, last_name, email_id, phone_number, profile_url,building_id,eleva_id ) VALUES ($1, $2, $3,$4,$5,$6,$7,$8)',
-                            [secretary_id, first_name, last_name, email_id, phone_number, profile_url, building_id, eleva_id],
+                            'INSERT INTO secretary_details ( secretary_id,first_name, last_name, email_id, phone_number, profile_url,building_id ) VALUES ($1, $2, $3,$4,$5,$6,$7)',
+                            [secretary_id, first_name, last_name, email_id, phone_number, profile_url, building_id],
                             (error, result) => {
                                 client.release();
                                 if (error) {
+                                    console.log(`error : ${error}`);
                                     return res.status(400).json({
                                         status: false,
                                         reCode: 400,
                                         msg: "Not Registerd Sucessfully"
                                     });
+
                                 }
                                 console.log(result.rows);
                                 res.status(200).json({
                                     status: true,
                                     reCode: 200,
-                                    response: `${secretary_id} ${first_name},${last_name},${email_id},${phone_number},${building_id},${eleva_id}`,
-                                    msg: `User Registerd  Sucessfully`
+                                    response: `${secretary_id} ${first_name},${last_name},${email_id},${phone_number},${building_id}`,
+                                    msg: `User Registered  Sucessfully`
                                 });
                             }
                         );
@@ -112,6 +115,7 @@ const creatUserSecretary = (req, res) => {
             }
         })
     } catch (error) {
+        client.release();
         res.status(400).json({
             status: false,
             reCode: 400,
@@ -135,8 +139,13 @@ const getUserSecretary = (request, response) => {
                 return;
             }
             const id = request.params.id
-            client.query('select * from eleva.secretary_details where secretary_id = $1', [id], (error, result) => {
+            console.log(`id : ${id}`);
+            client.query('select * from secretary_details where secretary_id = $1', [id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
                         status: "sucess",
@@ -172,7 +181,7 @@ const getUserSecretary = (request, response) => {
 //     const secretary_id = parseInt(request.params.id)
 //     const { first_name, last_name, email_id, profile_url } = request.body
 
-//     pool.query('update eleva.secretary_details set first_name = $1,  last_name = $2, email_id = $3, profile_url = $4 where secretary_id = $5', [first_name, last_name, email_id, profile_url, secretary_id], (error, result) => {
+//     pool.query('update secretary_details set first_name = $1,  last_name = $2, email_id = $3, profile_url = $4 where secretary_id = $5', [first_name, last_name, email_id, profile_url, secretary_id], (error, result) => {
 //          response.status(200).json({
 //             status: true,
 //             reCode: 200,
@@ -206,7 +215,7 @@ const updateUserSecretaryName = (request, response) => {
             const secretary_id = request.params.id
             const { first_name, last_name } = request.body
 
-            client.query('update eleva.secretary_details set first_name = $1,  last_name = $2 where secretary_id = $3', [first_name, last_name, secretary_id], (error, result) => {
+            client.query('update secretary_details set first_name = $1,  last_name = $2 where secretary_id = $3', [first_name, last_name, secretary_id], (error, result) => {
                 client.release()
                 response.status(200).json({
                     status: true,
@@ -242,7 +251,7 @@ const updateUserSecretaryEmail = (request, response) => {
             }
             const secretary_id = request.params.id
             const { email_id } = request.body
-            client.query('update eleva.secretary_details set email_id = $1 where secretary_id = $2', [email_id, secretary_id], (error, result) => {
+            client.query('update secretary_details set email_id = $1 where secretary_id = $2', [email_id, secretary_id], (error, result) => {
                 client.release();
                 response.status(200).json({
                     status: true,
@@ -276,13 +285,14 @@ const updateUserSecretaryProfile = (request, response) => {
                 return;
             }
             const secretary_id = request.params.id
+            console.log(`body : ${JSON.stringify(request.body)}`);
             const { profile_url } = request.body
-            client.query('update eleva.secretary_details set profile_url = $1 where secretary_id = $2', [profile_url, secretary_id], (error, result) => {
+            client.query('update secretary_details set profile_url = $1 where secretary_id = $2', [profile_url, secretary_id], (error, result) => {
                 client.release();
                 response.status(200).json({
                     status: true,
                     reCode: 200,
-                    response: `${secretary_id},${first_name},${last_name},${email_id},${profile_url}`,
+                    response: `${secretary_id},${profile_url}`,
                     msg: `UserProfile updated sucessfully`
                 })
             })
