@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const pool = require("./database");
 
 const checkUserSecretary = (req, res) => {
