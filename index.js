@@ -7,9 +7,12 @@ const routes = require('./routes');
 const createTables = require('./create-tables');
 createTables();
 
-app.use('/', routes);
+
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }))
+
+app.use('/', routes);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
