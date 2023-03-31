@@ -108,7 +108,7 @@ const createTables = () => {
         .then(() => pool.query(createElevaDetails))
         .then(() => console.log('Tables created successfully'))
         .catch(err => console.error(err))
-        .finally(() => pool.end());
+        //.finally(() => pool.end());
 
 }
 

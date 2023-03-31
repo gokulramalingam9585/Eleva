@@ -5,6 +5,7 @@ const CheckuserOccupants = (req, res) => {
     try {
         const phone_number = req.params.phone_number;
         pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+
             if (results.rows.length > 0) {
                 res.status(200).json({
                     status: "sucess",
@@ -23,6 +24,7 @@ const CheckuserOccupants = (req, res) => {
             })
         })
     } catch (error) {
+        console.log('error : ' + error);
         res.status(400).json({
             status: "error",
             reCode: 400,
@@ -34,6 +36,7 @@ const CheckuserOccupants = (req, res) => {
 
 const creatUserOccupants = (req, res) => {
     try {
+        console.log('data : ', JSON.stringify(req.body));
         const { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no } = req.body;
         console.log(
             { user_id, first_name, last_name, email_id, phone_number, profile_url, building_id, floor_no }
@@ -47,6 +50,7 @@ const creatUserOccupants = (req, res) => {
             return
         } else {
             pool.query('SELECT * FROM occupants_details WHERE phone_number = $1', [phone_number], (error, results) => {
+                console.log('error : ', error);
                 console.log(results.rows);
                 if (results.rows.length > 0) {
                     res.status(200).json({
