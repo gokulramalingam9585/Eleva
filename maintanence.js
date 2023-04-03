@@ -1,11 +1,10 @@
-const bcrypt = require('bcrypt');
 const pool = require("./database");
 
 const createMaintanence = (request, response) => {
     try {
         // Acquire a connection from the pool
         pool.connect((error, client) => {
-            const { id, eleva_id, building_id, secretary_id, date, from_time, to_time } = request.body
+            const { eleva_id, building_id, secretary_id, date, from_time, to_time } = request.body
             console.log({ date });
             if (error) {
                 response.status(500).json({
@@ -18,15 +17,25 @@ const createMaintanence = (request, response) => {
             }
 
             // Use the acquired connection to execute the database query
-            client.query('INSERT INTO eleva.maintanence_details ( id,eleva_id,building_id,secretary_id,date,from_time,to_time ) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-                [id, eleva_id, building_id, secretary_id, date, from_time, to_time], (error, result) => {
+            client.query('INSERT INTO maintanence_details (eleva_id,building_id,secretary_id,date,from_time,to_time ) VALUES ($1,$2,$3,$4,$5,$6)',
+                [eleva_id, building_id, secretary_id, date, from_time, to_time], (error, result) => {
                     // Release the connection back to the pool
                     client.release();
+                    if (error) {
+                        console.log(`error : ${error}`);
+                        response.status(500).json({
+                            status: "Error",
+                            reCode: 500,
+                            msg: "Internal server error",
+                            isExist: false
+                        })
+                        return;
+                    }
                     response.status(200).json({
                         status: "Sucess",
                         reCode: 200,
-                        response: `${id},${eleva_id},${building_id},${secretary_id},${date},${from_time},${to_time}`,
-                        msg: 'Maintanence Sheduled successfully'
+                        response: `${eleva_id},${building_id},${secretary_id},${date},${from_time},${to_time}`,
+                        msg: 'Maintanence Scheduled successfully'
                     });
                 })
         });
@@ -56,22 +65,35 @@ const getMaintanence = (request, response) => {
                 return;
             }
             const building_id = request.params.building_id
+            const current_date = request.params.current_date
+
+            console.log(`current_date : ${current_date}`);
             // Use the acquired connection to execute the database query
-            client.query('select * from eleva.maintanence_details where building_id = $1', [building_id], (error, result) => {
+            client.query('select * from maintanence_details where building_id = $1 and date >= $2', [building_id, current_date], (error, result) => {
                 console.log("error", error);
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
-                        status: "Sucess",
+                        status: "Success",
                         reCode: 200,
                         response: `${building_id}`,
-                        msg: "Maintanence Not Exisit",
+                        msg: "Maintanence Not Exist",
                         isExist: false,
                     })
                     return
                 }
                 response.status(200).json({
-                    status: "Sucess",
+                    status: "Success",
                     reCode: 200,
                     msg: "Maintanence Available",
                     isExist: true,

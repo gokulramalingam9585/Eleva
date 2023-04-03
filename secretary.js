@@ -5,7 +5,7 @@ const checkUserSecretary = (req, res) => {
         // Acquire a connection from the pool
         pool.connect((error, client) => {
             if (error) {
-                response.status(500).json({
+                res.status(500).json({
                     status: "Error",
                     reCode: 500,
                     msg: "Failed to acquire a database connection",
@@ -16,9 +16,19 @@ const checkUserSecretary = (req, res) => {
             const phone_number = req.params.phone_number;
             client.query('SELECT * FROM secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    res.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (results.rows.length > 0) {
                     res.status(200).json({
-                        status: 'sucess',
+                        status: 'success',
                         resCode: 200,
                         response: `${phone_number}`,
                         msg: "Phone number Already exist",
@@ -27,7 +37,7 @@ const checkUserSecretary = (req, res) => {
                     return
                 }
                 res.status(200).json({
-                    status: "sucess",
+                    status: "success",
                     reCode: 200,
                     response: `${phone_number}`,
                     msg: "Phone number not Exist",
@@ -64,7 +74,7 @@ const creatUserSecretary = (req, res) => {
             );
             if (!phone_number) {
                 res.status(400).json({
-                    status: false,
+                    status: 'Error',
                     reCode: 400,
                     msg: "Please enter the Phone Number"
                 })
@@ -72,12 +82,22 @@ const creatUserSecretary = (req, res) => {
             } else {
 
                 client.query('SELECT * FROM secretary_details WHERE phone_number = $1', [phone_number], (error, results) => {
-                    // client.release();
                     console.log(results.rows);
+                    if (error) {
+                        client.release();
+                        console.log(`error : ${error}`);
+                        response.status(500).json({
+                            status: "Error",
+                            reCode: 500,
+                            msg: "Internal server error",
+                            isExist: false
+                        })
+                        return;
+                    }
                     if (results.rows.length > 0) {
                         client.release();
                         res.status(200).json({
-                            status: 'sucess',
+                            status: 'success',
                             resCode: 200,
                             response: `${phone_number}`,
                             msg: "Phone number Already exist",
@@ -93,16 +113,17 @@ const creatUserSecretary = (req, res) => {
                                 client.release();
                                 if (error) {
                                     console.log(`error : ${error}`);
-                                    return res.status(400).json({
-                                        status: false,
-                                        reCode: 400,
-                                        msg: "Not Registerd Sucessfully"
-                                    });
-
+                                    res.status(500).json({
+                                        status: "Error",
+                                        reCode: 500,
+                                        msg: "Internal server error",
+                                        isExist: false
+                                    })
+                                    return;
                                 }
-                                console.log(result.rows);
+
                                 res.status(200).json({
-                                    status: true,
+                                    status: 'success',
                                     reCode: 200,
                                     response: `${secretary_id} ${first_name},${last_name},${email_id},${phone_number},${building_id}`,
                                     msg: `User Registered  Sucessfully`
@@ -116,7 +137,7 @@ const creatUserSecretary = (req, res) => {
     } catch (error) {
         client.release();
         res.status(400).json({
-            status: false,
+            status: 'Error',
             reCode: 400,
             msg: "Invalid Request"
         })
@@ -143,11 +164,17 @@ const getUserSecretary = (request, response) => {
                 client.release();
                 if (error) {
                     console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
                     return;
                 }
                 if (!result.rows.length) {
                     response.status(200).json({
-                        status: "sucess",
+                        status: "success",
                         reCode: 200,
                         response: `${id}`,
                         msg: "User Not Exist",
@@ -156,7 +183,7 @@ const getUserSecretary = (request, response) => {
                     return
                 }
                 response.status(200).json({
-                    status: "sucess",
+                    status: "success",
                     reCode: 200,
                     msg: "Secretary Available",
                     isExist: true,
@@ -174,29 +201,6 @@ const getUserSecretary = (request, response) => {
         return
     }
 }
-
-// const updateUserSecretary = (request, response) => {
-// try{     
-//     const secretary_id = parseInt(request.params.id)
-//     const { first_name, last_name, email_id, profile_url } = request.body
-
-//     pool.query('update secretary_details set first_name = $1,  last_name = $2, email_id = $3, profile_url = $4 where secretary_id = $5', [first_name, last_name, email_id, profile_url, secretary_id], (error, result) => {
-//          response.status(200).json({
-//             status: true,
-//             reCode: 200,
-//             response:`${secretary_id},${first_name},${last_name},${email_id},${profile_url}`,
-//             msg: `User updated sucessfully`
-//         })
-//     })
-// } catch(error) {
-//     response.status(400).json({
-//        status: false,
-//        reCode: 400,
-//        msg: "Not Updated Sucessfully"
-//    })
-//    return
-// }
-// }
 
 const updateUserSecretaryName = (request, response) => {
     try {
@@ -216,8 +220,18 @@ const updateUserSecretaryName = (request, response) => {
 
             client.query('update secretary_details set first_name = $1,  last_name = $2 where secretary_id = $3', [first_name, last_name, secretary_id], (error, result) => {
                 client.release()
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
-                    status: true,
+                    status: 'success',
                     reCode: 200,
                     response: `${first_name},${last_name}`,
                     msg: `UserName updated sucessfully`
@@ -226,7 +240,7 @@ const updateUserSecretaryName = (request, response) => {
         })
     } catch (error) {
         response.status(400).json({
-            status: false,
+            status: 'Error',
             reCode: 400,
             msg: "Not Updated Sucessfully"
         })
@@ -252,8 +266,18 @@ const updateUserSecretaryEmail = (request, response) => {
             const { email_id } = request.body
             client.query('update secretary_details set email_id = $1 where secretary_id = $2', [email_id, secretary_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
-                    status: true,
+                    status: 'success',
                     reCode: 200,
                     response: `${email_id}`,
                     msg: `UserEmail updated sucessfully`
@@ -262,7 +286,7 @@ const updateUserSecretaryEmail = (request, response) => {
         })
     } catch (error) {
         response.status(400).json({
-            status: false,
+            status: 'Error',
             reCode: 400,
             msg: "Not Updated Sucessfully"
         })
@@ -288,8 +312,18 @@ const updateUserSecretaryProfile = (request, response) => {
             const { profile_url } = request.body
             client.query('update secretary_details set profile_url = $1 where secretary_id = $2', [profile_url, secretary_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
-                    status: true,
+                    status: 'success',
                     reCode: 200,
                     response: `${secretary_id},${profile_url}`,
                     msg: `UserProfile updated sucessfully`
@@ -298,7 +332,7 @@ const updateUserSecretaryProfile = (request, response) => {
         })
     } catch (error) {
         response.status(400).json({
-            status: false,
+            status: 'Error',
             reCode: 400,
             msg: "Not Updated Sucessfully"
         })

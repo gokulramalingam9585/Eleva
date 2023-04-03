@@ -1,7 +1,3 @@
-
-const bcrypt = require('bcrypt');
-const { request } = require('express');
-
 const pool = require("./database");
 
 const getElevaDetails = (request, response) => {
@@ -18,11 +14,21 @@ const getElevaDetails = (request, response) => {
                 return;
             }
             const id = request.params.id
-            client.query('select * from eleva.eleva_details where eleva_id = $1', [id], (error, result) => {
+            client.query('select * from eleva_details where eleva_id = $1', [id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
-                        status: "sucess",
+                        status: "success",
                         reCode: 200,
                         response: `${id}`,
                         msg: "eleva Not Exist",
@@ -31,7 +37,7 @@ const getElevaDetails = (request, response) => {
                     return
                 } else {
                     response.status(200).json({
-                        status: "sucess",
+                        status: "success",
                         reCode: 200,
                         msg: "Eleva Available ",
                         isExist: true,
@@ -67,11 +73,21 @@ const getBuildingDetails = (request, response) => {
                 return;
             }
             const building_id = request.params.building_id
-            client.query('select * from eleva.eleva_details where building_id = $1', [building_id], (error, result) => {
+            client.query('select * from eleva_details where building_id = $1', [building_id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
-                        status: "sucess",
+                        status: "success",
                         reCode: 200,
                         response: `${building_id}`,
                         msg: "Building Not Exist",
@@ -81,7 +97,7 @@ const getBuildingDetails = (request, response) => {
                 }
                 else {
                     response.status(200).json({
-                        status: "sucess",
+                        status: "success",
                         reCode: 200,
                         msg: "Eleva Available",
                         isExist: true,

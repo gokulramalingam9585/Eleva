@@ -293,6 +293,7 @@ const updateUserOccupantsName = (request, response) => {
             })
         })
     } catch (error) {
+        console.log(`error : ${error}`);
         response.status(400).json({
             status: false,
             reCode: 400,

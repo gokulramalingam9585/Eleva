@@ -1,6 +1,3 @@
-
-const bcrypt = require('bcrypt');
-const { request } = require('express');
 const pool = require("./database");
 
 const creatEventsOccupants = (request, response) => {
@@ -21,6 +18,7 @@ const creatEventsOccupants = (request, response) => {
             client.query('INSERT INTO events_details ( title,details,date,from_time,to_time,location,status,cancel_reason,denied_reason,building_id,created_by,creator_id,secretary_notes ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
                 [title, details, date, from_time, to_time, location, status, cancel_reason, denied_reason, building_id, created_by, creator_id, secretary_notes],
                 (error, result) => {
+                    client.release();
                     if (error) {
                         console.log(`error : ${error}`);
                         response.status(500).json({
@@ -31,7 +29,7 @@ const creatEventsOccupants = (request, response) => {
                         })
                         return;
                     }
-                    client.release();
+
                     response.status(200).json({
                         status: "Sucess",
                         reCode: 200,
@@ -68,9 +66,19 @@ const getEvents = (request, response) => {
             const id = request.params.id
             client.query('select * from events_details where id = $1', [id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
-                        status: "Sucess",
+                        status: "Success",
                         reCode: 200,
                         response: `${id}`,
                         msg: "Event Not Exisit",
@@ -79,7 +87,7 @@ const getEvents = (request, response) => {
                     return
                 }
                 response.status(200).json({
-                    status: "Sucess",
+                    status: "Success",
                     reCode: 200,
                     msg: "Events Available",
                     isExist: true,
@@ -97,8 +105,6 @@ const getEvents = (request, response) => {
         return
     }
 }
-
-
 
 const getAllEvents = (request, response) => {
     try {
@@ -118,6 +124,16 @@ const getAllEvents = (request, response) => {
             const status = request.params.status + ''
             client.query("SELECT events_details.*, occupants_details.first_name as occ_first_name,occupants_details.last_name as occ_last_name,occupants_details.profile_url as occ_profile_url, secretary_details.first_name as sec_first_name,secretary_details.last_name as sec_last_name,secretary_details.profile_url as sec_profile_url FROM events_details LEFT JOIN occupants_details ON events_details.creator_id = occupants_details.user_id AND events_details.created_by = 'occupant' LEFT JOIN secretary_details ON events_details.creator_id = secretary_details.secretary_id AND events_details.created_by = 'secretary' where events_details.building_id = $1 and events_details.date>=$2 and events_details.status = $3", [building_id, date, status], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
                         status: "Success",
@@ -171,15 +187,24 @@ const getAllEventsAcceptedRejected = (request, response) => {
 
             client.query("SELECT * from events_details where building_id = $1 and date>=$2 and creator_id = $3 and (status = $4 or status = $5)", [building_id, date, creator_id, stat_acc, stat_rej], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 if (!result.rows.length) {
                     response.status(200).json({
                         status: "Success",
                         reCode: 200,
                         response: `${building_id}`,
-                        msg: "Events Not Availables",
+                        msg: "Events Not Available",
                         isExist: false
                     })
-                    console.log(result.rows.length);
                     return
                 }
                 response.status(200).json({
@@ -219,8 +244,18 @@ const deleteEvent = (request, response) => {
             const id = request.params.id;
             client.query('DELETE FROM events_details WHERE id = $1', [id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
-                    status: "sucess",
+                    status: "success",
                     reCode: 200,
                     response: `${id}`,
                     Msg: 'Event Deleted Sucessfully'
@@ -231,7 +266,7 @@ const deleteEvent = (request, response) => {
         response.status(400).json({
             status: "Error",
             reCode: 400,
-            msg: "Not Deleted Sucessfully",
+            msg: "Event not deleted",
             isExist: false
         })
         return
@@ -255,6 +290,16 @@ const updateEventStatus = (request, response) => {
             if (status == 'accepted') {
                 client.query('update events_details set secretary_notes = $1, status = $2 where id = $3', [secretary_notes, status, id], (error, result) => {
                     client.release();
+                    if (error) {
+                        console.log(`error : ${error}`);
+                        response.status(500).json({
+                            status: "Error",
+                            reCode: 500,
+                            msg: "Internal server error",
+                            isExist: false
+                        })
+                        return;
+                    }
                     response.status(200).json({
                         status: true,
                         reCode: 200,
@@ -263,6 +308,17 @@ const updateEventStatus = (request, response) => {
                 })
             } else if (status == 'rejected') {
                 pool.query('update events_details set status = $1,  denied_reason = $2 where id = $3', [status, denied_reason, id], (error, result) => {
+                    client.release();
+                    if (error) {
+                        console.log(`error : ${error}`);
+                        response.status(500).json({
+                            status: "Error",
+                            reCode: 500,
+                            msg: "Internal server error",
+                            isExist: false
+                        })
+                        return;
+                    }
                     response.status(200).json({
                         status: true,
                         reCode: 200,
@@ -271,6 +327,17 @@ const updateEventStatus = (request, response) => {
                 })
             } else if (status == 'cancelled') {
                 pool.query('update events_details set status = $1, cancel_reason = $2 where id = $3', [status, cancel_reason, id], (error, result) => {
+                    client.release();
+                    if (error) {
+                        console.log(`error : ${error}`);
+                        response.status(500).json({
+                            status: "Error",
+                            reCode: 500,
+                            msg: "Internal server error",
+                            isExist: false
+                        })
+                        return;
+                    }
                     response.status(200).json({
                         status: true,
                         reCode: 200,
@@ -306,6 +373,16 @@ const updateEventDetails = (request, response) => {
 
             client.query('update events_details set title = $1,  details = $2,date = $3,from_time = $4, to_time = $5, location = $6 where id = $7', [title, details, date, from_time, to_time, location, id], (error, result) => {
                 client.release();
+                if (error) {
+                    console.log(`error : ${error}`);
+                    response.status(500).json({
+                        status: "Error",
+                        reCode: 500,
+                        msg: "Internal server error",
+                        isExist: false
+                    })
+                    return;
+                }
                 response.status(200).json({
                     status: true,
                     reCode: 200,

@@ -3,7 +3,7 @@ const client = require("./database");
 const createTables = () => {
     client.connect((error, client) => {
         if (error) {
-            console.log(`error : ${error}`);
+            console.log(`DB connect error : ${error}`);
             return;
         }
 
@@ -13,8 +13,8 @@ const createTables = () => {
         title text ,
         details text ,
         date date,
-        from_time time without time zone,
-        to_time time without time zone,
+        from_time character varying,
+        to_time character varying,
         location text ,
         status character varying ,
         cancel_reason text ,
@@ -49,8 +49,7 @@ const createTables = () => {
         building_id text  NOT NULL,
         eleva_id integer NOT NULL,
         CONSTRAINT secretary_details_pkey PRIMARY KEY (secretary_id)
-    )`
-            ;
+    )`;
 
         const createMaintanenceDetails = `CREATE TABLE IF NOT EXISTS maintanence_details
     (
@@ -59,16 +58,15 @@ const createTables = () => {
         building_id text  NOT NULL,
         secretary_id text  NOT NULL,
         date date,
-        from_time time without time zone,
-        to_time time without time zone
-    )
-    `;
+        from_time character varying,
+        to_time character varying
+    )`;
 
         const createElevaDetails = `
     CREATE TABLE IF NOT EXISTS eleva_details
     (
-        eleva_name character varying  NOT NULL,
         eleva_id integer NOT NULL,
+        eleva_name character varying  NOT NULL,
         building_id integer NOT NULL,
         secretary_id text  NOT NULL,
         date date NOT NULL,
@@ -93,16 +91,15 @@ const createTables = () => {
         emergency_contact integer NOT NULL,
         "time" time without time zone NOT NULL,
         CONSTRAINT eleva_details_pkey PRIMARY KEY (eleva_id)
-    )`
-            ;
+    )`;
 
         const createBuildingDetails = `CREATE TABLE IF NOT EXISTS building_details
     (
         building_id integer NOT NULL,
         building_name character varying  NOT NULL,
         CONSTRAINT building_details_pkey PRIMARY KEY (building_id)
-    );
-    `
+    )`;
+
         client.query(createEventsDetails)
             .then(() => client.query(createBuildingDetails))
             .then(() => client.query(createMaintanenceDetails))
