@@ -215,7 +215,7 @@ const updateUserSecretaryName = (request, response) => {
                 });
                 return;
             }
-            const secretary_id = request.params.id
+            const secretary_id = request.params.secretary_id
             const { first_name, last_name } = request.body
 
             client.query('update secretary_details set first_name = $1,  last_name = $2 where secretary_id = $3', [first_name, last_name, secretary_id], (error, result) => {
@@ -262,7 +262,7 @@ const updateUserSecretaryEmail = (request, response) => {
                 });
                 return;
             }
-            const secretary_id = request.params.id
+            const secretary_id = request.params.secretary_id
             const { email_id } = request.body
             client.query('update secretary_details set email_id = $1 where secretary_id = $2', [email_id, secretary_id], (error, result) => {
                 client.release();
@@ -307,7 +307,7 @@ const updateUserSecretaryProfile = (request, response) => {
                 });
                 return;
             }
-            const secretary_id = request.params.id
+            const secretary_id = request.params.secretary_id
             console.log(`body : ${JSON.stringify(request.body)}`);
             const { profile_url } = request.body
             client.query('update secretary_details set profile_url = $1 where secretary_id = $2', [profile_url, secretary_id], (error, result) => {

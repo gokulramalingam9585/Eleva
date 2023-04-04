@@ -300,6 +300,13 @@ const updateEventStatus = (request, response) => {
                         })
                         return;
                     }
+                    if (result.rowCount == 0) {
+                        return response.status(200).json({
+                            status: false,
+                            reCode: 400,
+                            msg: `Event not exist`
+                        })
+                    }
                     response.status(200).json({
                         status: true,
                         reCode: 200,
@@ -319,6 +326,13 @@ const updateEventStatus = (request, response) => {
                         })
                         return;
                     }
+                    if (result.rowCount == 0) {
+                        return response.status(200).json({
+                            status: false,
+                            reCode: 400,
+                            msg: `Event not exist`
+                        })
+                    }
                     response.status(200).json({
                         status: true,
                         reCode: 200,
@@ -337,6 +351,13 @@ const updateEventStatus = (request, response) => {
                             isExist: false
                         })
                         return;
+                    }
+                    if (result.rowCount == 0) {
+                        return response.status(200).json({
+                            status: false,
+                            reCode: 400,
+                            msg: `Event not exist`
+                        })
                     }
                     response.status(200).json({
                         status: true,

@@ -69,7 +69,7 @@ const getMaintanence = (request, response) => {
 
             console.log(`current_date : ${current_date}`);
             // Use the acquired connection to execute the database query
-            client.query('select * from maintanence_details where building_id = $1 and date >= $2', [building_id, current_date], (error, result) => {
+            client.query('select * from maintanence_details where building_id = $1 and date >= $2 order by date ASC', [building_id, current_date], (error, result) => {
                 console.log("error", error);
                 client.release();
                 if (error) {

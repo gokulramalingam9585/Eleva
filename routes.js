@@ -31,8 +31,9 @@ router.get('/events/:id', events.getEvents)
 router.get('/events/getallevents/:building_id/:date/:status', events.getAllEvents)
 router.get('/events/alleventsacceptreject/:building_id/:date/:creator_id', events.getAllEventsAcceptedRejected)
 router.delete('/delete_event/:id', events.deleteEvent)
-router.put('/events/update/:id', events.updateEventStatus)
-router.put('/events/updatedetails/:id', events.updateEventDetails)
+
+router.put('/events/updatestatus', events.updateEventStatus)
+router.put('/events/updatedetails', events.updateEventDetails)
 
 router.post('/schedule_maintenance', maintanence.createMaintanence)
 router.get('/eleva_maintenance/:building_id/:current_date', maintanence.getMaintanence)
