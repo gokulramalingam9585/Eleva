@@ -52,6 +52,17 @@ const createMaintanence = (request, response) => {
 
 
 const getMaintanence = (request, response) => {
+
+    console.log(`request.url : ${request.url}`);
+    var isCurrentDate;
+    const urlPath = request.url;
+    if (urlPath.includes('cd_')) {
+        console.log('url matched');
+        isCurrentDate = true;
+    } else {
+        console.log('url not matched');
+        isCurrentDate = false;
+    }
     try {
         // Acquire a connection from the pool
         pool.connect((error, client) => {
@@ -69,7 +80,15 @@ const getMaintanence = (request, response) => {
 
             console.log(`current_date : ${current_date}`);
             // Use the acquired connection to execute the database query
-            client.query('select * from maintanence_details where building_id = $1 and date >= $2 order by date ASC', [building_id, current_date], (error, result) => {
+
+            var query = '';
+            if (isCurrentDate) {
+                query = 'select * from maintanence_details where building_id = $1 and date = $2 order by date ASC';
+            }
+            else {
+                query = 'select * from maintanence_details where building_id = $1 and date >= $2 order by date ASC';
+            }
+            client.query(query, [building_id, current_date], (error, result) => {
                 console.log("error", error);
                 client.release();
                 if (error) {

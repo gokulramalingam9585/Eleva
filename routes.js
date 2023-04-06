@@ -37,6 +37,7 @@ router.put('/events/updatedetails', events.updateEventDetails)
 
 router.post('/schedule_maintenance', maintanence.createMaintanence)
 router.get('/eleva_maintenance/:building_id/:current_date', maintanence.getMaintanence)
+router.get('/cd_eleva_maintenance/:building_id/:current_date', maintanence.getMaintanence)
 
 router.get('/eleva_device/occupants/:building_id', elevaDevice.getOccupants)
 router.get('/eleva_device/events/:id', elevaDevice.getElevaEvents)

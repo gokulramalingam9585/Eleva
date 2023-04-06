@@ -13,6 +13,10 @@ app.use(bodyparser.urlencoded({ extended: false }))
 
 app.use('/', routes);
 
+app.use('/test', (req, res) => {
+  res.send('hello world');
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
