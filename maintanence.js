@@ -63,6 +63,7 @@ const getMaintanence = (request, response) => {
         console.log('url not matched');
         isCurrentDate = false;
     }
+
     try {
         // Acquire a connection from the pool
         pool.connect((error, client) => {
