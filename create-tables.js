@@ -47,7 +47,6 @@ const createTables = () => {
         phone_number character varying  NOT NULL,
         profile_url character varying ,
         building_id text  NOT NULL,
-        eleva_id integer NOT NULL,
         CONSTRAINT secretary_details_pkey PRIMARY KEY (secretary_id)
     )`;
 
@@ -99,6 +98,7 @@ const createTables = () => {
         building_name character varying  NOT NULL,
         CONSTRAINT building_details_pkey PRIMARY KEY (building_id)
     )`;
+
 
         client.query(createEventsDetails)
             .then(() => client.query(createBuildingDetails))
